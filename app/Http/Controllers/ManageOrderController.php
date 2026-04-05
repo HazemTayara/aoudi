@@ -13,7 +13,7 @@ class ManageOrderController extends Controller
     public function index(Request $request)
     {
         // getting incomming orders only
-        $query = Order::with(['menafest.fromCity', 'menafest.toCity', 'driver'])
+        $query = Order::withoutTrashed()->with(['menafest.fromCity', 'menafest.toCity', 'driver'])
             ->incoming();
 
         // ─── Text search filters ───
@@ -125,6 +125,14 @@ class ManageOrderController extends Controller
         return view('manage-orders.index', compact('orders', 'stats'));
     }
 
+    public function show()
+    {
+        $orders = Order::onlyTrashed()->latest('deleted_at')->paginate(25);
+        $stats = [];
+
+        return view('manage-orders.trashed', compact('orders', 'stats'));
+    }
+
     /**
      * Toggle the is_paid status of an order.
      */
@@ -170,6 +178,38 @@ class ManageOrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم حفظ الملاحظات بنجاح',
+        ]);
+    }
+
+    public function destroy(Order $order)
+    {
+        $order->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الطلب بنجاح'
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $order = Order::onlyTrashed()->findOrFail($id);
+        $order->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم استعادة الطلب بنجاح'
+        ]);
+    }
+
+    public function forceDelete($id)
+    {
+        $order = Order::onlyTrashed()->findOrFail($id);
+        $order->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الطلب نهائياً'
         ]);
     }
 }

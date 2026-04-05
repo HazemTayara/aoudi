@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Menafest extends Model
 {
+
+    use SoftDeletes;
+
     protected $fillable = [
         'from_city_id',
         'to_city_id',
@@ -14,6 +18,8 @@ class Menafest extends Model
         'car',
         'notes'
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function fromCity()
     {
@@ -28,6 +34,25 @@ class Menafest extends Model
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($menafest) {
+            // Soft delete all related orders
+            foreach ($menafest->orders as $order) {
+                $order->delete();
+            }
+        });
+
+        static::restoring(function ($menafest) {
+            // Restore all related orders
+            foreach ($menafest->orders()->onlyTrashed()->get() as $order) {
+                $order->restore();
+            }
+        });
     }
 
     public function menafestType(): string

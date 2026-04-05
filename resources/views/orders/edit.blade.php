@@ -54,7 +54,7 @@
                                 pattern="[0-9,]*">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-bold small">ضد الشاحن</label>
+                            <label class="form-label fw-bold small">ضد الشحن</label>
                             <input type="text" name="anti_charger" class="form-control integer-input"
                                 value="{{ $order->anti_charger ? number_format($order->anti_charger) : '' }}"
                                 inputmode="numeric" pattern="[0-9,]*">

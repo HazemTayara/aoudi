@@ -34,6 +34,18 @@
                     <i class="fas fa-file-excel me-2"></i>تصدير Excel
                 </a>
             @endif
+
+            @php 
+                $trashedCount = $menafest->orders()->onlyTrashed()->count();
+            @endphp
+
+            <a href="{{ route('menafests.orders.trashed', $menafest) }}"
+                class="btn btn-warning btn-lg rounded-pill px-4 me-2">
+                <i class="fas fa-trash-alt me-2"></i>سلة المحذوفات
+                @if($trashedCount > 0)
+                    <span class="badge bg-danger ms-1">{{ $trashedCount }}</span>
+                @endif
+            </a>
         </div>
 
         <!-- Quick Stats Row -->
@@ -169,7 +181,7 @@
                                 inputmode="numeric" pattern="[0-9,]*">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-bold small">ضد الشاحن</label>
+                            <label class="form-label fw-bold small">ضد الشحن</label>
                             <input type="text" name="anti_charger" id="anti_charger" class="form-control price-input"
                                 inputmode="numeric" pattern="[0-9,]*">
                         </div>
@@ -233,7 +245,7 @@
                                 <th>المرسل إليه</th>
                                 <th>نوع الدفع</th>
                                 <th>المبلغ</th>
-                                <th>ضد الشاحن</th>
+                                <th>ضد الشحن</th>
                                 <th>المحول</th>
                                 <th>متفرقات</th>
                                 <th>الخصم</th>
@@ -356,10 +368,18 @@
                                     @endif
 
                                     <td>
-                                        <a href="{{ route('orders.edit', $order) }}"
-                                            class="btn btn-sm btn-outline-primary rounded-circle" title="تعديل">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('orders.edit', $order) }}"
+                                                class="btn btn-sm btn-outline-primary rounded-circle" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-danger rounded-circle delete-btn"
+                                                data-id="{{ $order->id }}" data-number="{{ $order->order_number }}"
+                                                data-menafest-id="{{ $menafest->id }}" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -653,66 +673,66 @@
 
                 // Build the new row HTML with your exact structure
                 const newRow = `
-                                                                        <tr id="order-row-${order.id}" 
-                                                                            data-order-number="${order.order_number}"
-                                                                            data-content="${order.content || 'طرد'}"
-                                                                            data-count="${order.count}"
-                                                                            data-sender="${order.sender}"
-                                                                            data-recipient="${order.recipient}"
-                                                                            data-pay-type="${order.pay_type}"
-                                                                            data-amount="${order.amount}"
-                                                                            data-anti-charger="${order.anti_charger}"
-                                                                            data-transmitted="${order.transmitted}"
-                                                                            data-miscellaneous="${order.miscellaneous}"
-                                                                            data-discount="${order.discount}"
-                                                                            data-paid="${order.is_paid ? '1' : '0'}"
-                                                                            data-exist="${order.is_exist !== undefined ? (order.is_exist ? '1' : '0') : '1'}"
-                                                                            data-notes="${order.notes || ''}">
-                                                                            <td><span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill">${iteration}</span></td>
-                                                                            <td class="fw-bold">${order.order_number}</td>
-                                                                            <td>${order.content || 'طرد'}</td>
-                                                                            <td>${formatNumber(order.count)}</td>
-                                                                            <td>${order.sender}</td>
-                                                                            <td>${order.recipient}</td>
-                                                                            <td>
-                                                                                ${order.pay_type == 'تحصيل' ?
+                                                                                        <tr id="order-row-${order.id}" 
+                                                                                            data-order-number="${order.order_number}"
+                                                                                            data-content="${order.content || 'طرد'}"
+                                                                                            data-count="${order.count}"
+                                                                                            data-sender="${order.sender}"
+                                                                                            data-recipient="${order.recipient}"
+                                                                                            data-pay-type="${order.pay_type}"
+                                                                                            data-amount="${order.amount}"
+                                                                                            data-anti-charger="${order.anti_charger}"
+                                                                                            data-transmitted="${order.transmitted}"
+                                                                                            data-miscellaneous="${order.miscellaneous}"
+                                                                                            data-discount="${order.discount}"
+                                                                                            data-paid="${order.is_paid ? '1' : '0'}"
+                                                                                            data-exist="${order.is_exist !== undefined ? (order.is_exist ? '1' : '0') : '1'}"
+                                                                                            data-notes="${order.notes || ''}">
+                                                                                            <td><span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill">${iteration}</span></td>
+                                                                                            <td class="fw-bold">${order.order_number}</td>
+                                                                                            <td>${order.content || 'طرد'}</td>
+                                                                                            <td>${formatNumber(order.count)}</td>
+                                                                                            <td>${order.sender}</td>
+                                                                                            <td>${order.recipient}</td>
+                                                                                            <td>
+                                                                                                ${order.pay_type == 'تحصيل' ?
                         '<span class="badge bg-warning text-dark px-3 py-2 rounded-pill">تحصيل</span>' :
                         '<span class="badge bg-success text-white px-3 py-2 rounded-pill">مسبق</span>'}
-                                                                            </td>
-                                                                            <td>${formatNumber(order.amount)}</td>
-                                                                            <td>${formatNumber(order.anti_charger)}</td>
-                                                                            <td>${formatNumber(order.transmitted)}</td>
-                                                                            <td>${formatNumber(order.miscellaneous)}</td>
-                                                                            <td>${formatNumber(order.discount)}</td>
-                                                                            ${type == 'incoming' ? `
-                                                                                <td>
-                                                                                    <div class="form-check form-switch">
-                                                                                        <input class="form-check-input toggle-paid" type="checkbox"
-                                                                                            data-id="${order.id}" ${order.is_paid ? 'checked' : ''}>
-                                                                                    </div>
-                                                                                    ${order.paid_at ? `<small class="text-muted d-block">${new Date(order.paid_at).toLocaleString('ar')}</small>` : ''}
-                                                                                </td>
-                                                                                <td>
-                                                                                    <div class="form-check form-switch">
-                                                                                        <input class="form-check-input toggle-exist" type="checkbox"
-                                                                                            data-id="${order.id}" ${(order.is_exist !== undefined ? order.is_exist : true) ? 'checked' : ''}>
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>
-                                                                                <span class="text-truncate d-inline-block" style="max-width: 150px;"
-                                                                                    title="${order.notes || ''}">
-                                                                                    ${order.notes || '—'}
-                                                                                </span>
-                                                                            </td>
-                                                                            ` : ''}
-                                                                            <td>
-                                                                                <a href="/orders/${order.id}/edit"
-                                                                                    class="btn btn-sm btn-outline-primary rounded-circle" title="تعديل">
-                                                                                    <i class="fas fa-edit"></i>
-                                                                                </a>
-                                                                            </td>
-                                                                        </tr>
-                                                                    `;
+                                                                                            </td>
+                                                                                            <td>${formatNumber(order.amount)}</td>
+                                                                                            <td>${formatNumber(order.anti_charger)}</td>
+                                                                                            <td>${formatNumber(order.transmitted)}</td>
+                                                                                            <td>${formatNumber(order.miscellaneous)}</td>
+                                                                                            <td>${formatNumber(order.discount)}</td>
+                                                                                            ${type == 'incoming' ? `
+                                                                                                <td>
+                                                                                                    <div class="form-check form-switch">
+                                                                                                        <input class="form-check-input toggle-paid" type="checkbox"
+                                                                                                            data-id="${order.id}" ${order.is_paid ? 'checked' : ''}>
+                                                                                                    </div>
+                                                                                                    ${order.paid_at ? `<small class="text-muted d-block">${new Date(order.paid_at).toLocaleString('ar')}</small>` : ''}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <div class="form-check form-switch">
+                                                                                                        <input class="form-check-input toggle-exist" type="checkbox"
+                                                                                                            data-id="${order.id}" ${(order.is_exist !== undefined ? order.is_exist : true) ? 'checked' : ''}>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                <span class="text-truncate d-inline-block" style="max-width: 150px;"
+                                                                                                    title="${order.notes || ''}">
+                                                                                                    ${order.notes || '—'}
+                                                                                                </span>
+                                                                                            </td>
+                                                                                            ` : ''}
+                                                                                            <td>
+                                                                                                <a href="/orders/${order.id}/edit"
+                                                                                                    class="btn btn-sm btn-outline-primary rounded-circle" title="تعديل">
+                                                                                                    <i class="fas fa-edit"></i>
+                                                                                                </a>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    `;
 
                 // Prepend to table body (newest first) or append based on your preference
                 $('#ordersTableBody').prepend(newRow);
@@ -900,7 +920,7 @@
                 checkbox.prop('disabled', true);
 
                 $.ajax({
-                    url: '/orders/' + orderId + '/toggle-paid',
+                    url: '/manage-orders/' + orderId + '/toggle-paid',
                     type: 'PATCH',
                     success: function (response) {
                         if (response.success) {
@@ -956,7 +976,7 @@
                 checkbox.prop('disabled', true);
 
                 $.ajax({
-                    url: '/orders/' + orderId + '/toggle-exist',
+                    url: '/manage-orders/' + orderId + '/toggle-exist',
                     type: 'PATCH',
                     success: function (response) {
                         if (response.success) {
@@ -1019,7 +1039,7 @@
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
                 $.ajax({
-                    url: '/drivers/orders/' + orderId + '/update-notes',
+                    url: '/manage-orders/' + orderId + '/update-notes',
                     type: 'PATCH',
                     data: { notes: newNotes },
                     success: function (response) {
@@ -1135,5 +1155,65 @@
                 document.getElementById('order_number').focus();
             }, 500);
         });
+
+
+        // Delete button handler
+$(document).on('click', '.delete-btn', function() {
+    const orderId = $(this).data('id');
+    const orderNumber = $(this).data('number');
+    const menafestId = $(this).data('menafest-id');
+    
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        html: `هل تريد حذف الطلب رقم <strong>${orderNumber}</strong>؟`,
+        text: "سيتم نقل الطلب إلى سلة المحذوفات",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'جاري الحذف...',
+                text: 'يرجى الانتظار',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                url: `/orders/${orderId}`,
+                type: 'DELETE',
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحذف',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    let errorMessage = 'حدث خطأ أثناء حذف الطلب';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: errorMessage,
+                        confirmButtonText: 'حسنًا'
+                    });
+                }
+            });
+        }
+    });
+});
     </script>
 @endpush

@@ -23,7 +23,7 @@
                             <li><strong>المرسل إليه</strong> - اسم المستلم (إلزامي)</li>
                             <li><strong>التحصيل</strong> - مبلغ التحصيل</li>
                             <li><strong>المدفوع مسبقا</strong> - المبلغ المدفوع مسبقاً</li>
-                            <li><strong>ضد الشحن</strong> - مبلغ ضد الشاحن</li>
+                            <li><strong>ضد الشحن</strong> - مبلغ ضد الشحن</li>
                             <li><strong>المحول</strong> - المبلغ المحول</li>
                             <li><strong>متفرقات متنوعة</strong> - مبلغ المتفرقات</li>
                             <li><strong>الخصم</strong> - مبلغ الخصم</li>
@@ -43,7 +43,7 @@
                             <li><strong>المرسل اليه</strong> - اسم المستلم (إلزامي)</li>
                             <li><strong>الصافي للدفع</strong> - قيمة الحوالة (إلزامي)</li>
                             <li><strong>الدفع</strong> - نوع الدفع (تحصيل - مسبق) </li>
-                            <li><strong>ضد الدفع</strong> - مبلغ ضد الشاحن</li>
+                            <li><strong>ضد الدفع</strong> - مبلغ ضد الشحن</li>
                             <li><strong>المحول</strong> - المبلغ المحول</li>
                             <li><strong>توصيل</strong> - مبلغ المتفرقات</li>
                         </ul>

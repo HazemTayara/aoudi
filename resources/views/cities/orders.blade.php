@@ -64,7 +64,7 @@
                 <div class="stat-card-sm">
                     <div class="d-flex align-items-center justify-content-center gap-2">
                         <i class="fas fa-shield-alt text-primary"></i>
-                        <span class="stat-label-sm">ضد الشاحن ({{ $stats['anti_charger_count'] }})</span>
+                        <span class="stat-label-sm">ضد الشحن ({{ $stats['anti_charger_count'] }})</span>
                     </div>
                     <h4 class="stat-value-sm">{{ format_number($stats['total_anti_charger']) }}</h4>
                 </div>
@@ -211,13 +211,13 @@
                                     value="{{ request('amount_max') }}" placeholder="إلى">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold small">ضد الشاحن من</label>
+                                <label class="form-label fw-bold small">ضد الشحن من</label>
                                 <input type="number" step="0.01" name="anti_charger_min"
                                     class="form-control form-control-sm" value="{{ request('anti_charger_min') }}"
                                     placeholder="من">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold small">ضد الشاحن إلى</label>
+                                <label class="form-label fw-bold small">ضد الشحن إلى</label>
                                 <input type="number" step="0.01" name="anti_charger_max"
                                     class="form-control form-control-sm" value="{{ request('anti_charger_max') }}"
                                     placeholder="إلى">
@@ -318,7 +318,7 @@
                                 <th>المرسل إليه</th>
                                 <th>نوع الدفع</th>
                                 <th>المبلغ</th>
-                                <th>ضد الشاحن</th>
+                                <th>ضد الشحن</th>
                                 <th>المحول</th>
                                 <th>متفرقات</th>
                                 <th>الخصم</th>

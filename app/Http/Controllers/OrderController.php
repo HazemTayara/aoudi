@@ -19,6 +19,14 @@ class OrderController extends Controller
         return view('orders.index', compact('menafest', 'orders'));
     }
 
+    public function trashedOrders(Menafest $menafest)
+    {
+        $orders = $menafest->orders()->onlyTrashed()->latest('deleted_at')->paginate(25);
+        $stats = [];
+
+        return view('orders.trashed', compact('menafest', 'orders', 'stats'));
+    }
+
     /**
      * Store a new order
      */

@@ -47,6 +47,27 @@ class MenafestController extends Controller
         return view('menafests.index', compact('menafests', 'type', 'pageTitle', 'localCity', 'cityStats'));
     }
 
+    public function incomingTrashed()
+    {
+        $localCity = City::where('is_local', true)->first();
+
+        if (!$localCity) {
+            return redirect()->route('settings.index')
+                ->with('error', 'الرجاء تحديد المدينة المحلية أولاً من صفحة الإعدادات');
+        }
+
+        $menafests = Menafest::onlyTrashed()
+            ->with(['fromCity', 'toCity', 'orders'])
+            ->where('to_city_id', $localCity->id)
+            ->latest()
+            ->paginate(10);
+
+        $type = 'incoming';
+        $pageTitle = 'المنافست الواردة المحذوفة';
+
+        return view('menafests.trashed', compact('menafests', 'type', 'pageTitle'));
+    }
+
     /**
      * Display outgoing manifests (from local city)
      */
@@ -81,6 +102,27 @@ class MenafestController extends Controller
         $pageTitle = 'منافست صادر';
 
         return view('menafests.index', compact('menafests', 'type', 'pageTitle', 'localCity', 'cityStats'));
+    }
+
+    public function outgoingTrashed()
+    {
+        $localCity = City::where('is_local', true)->first();
+
+        if (!$localCity) {
+            return redirect()->route('settings.index')
+                ->with('error', 'الرجاء تحديد المدينة المحلية أولاً من صفحة الإعدادات');
+        }
+
+        $menafests = Menafest::onlyTrashed()
+            ->with(['fromCity', 'toCity', 'orders'])
+            ->where('from_city_id', $localCity->id)
+            ->latest()
+            ->paginate(10);
+
+        $type = 'outgoing';
+        $pageTitle = 'المنافست الصادرة المحذوفة';
+
+        return view('menafests.trashed', compact('menafests', 'type', 'pageTitle'));
     }
 
     public function exportOutgoing(Menafest $menafest)
@@ -258,19 +300,66 @@ class MenafestController extends Controller
     /**
      * Remove the specified manifest
      */
-    // public function destroy(Menafest $menafest)
-    // {
-    //     $localCity = City::where('is_local', true)->first();
-    //     $wasOutgoing = ($menafest->from_city_id == $localCity->id);
+    public function destroy(Menafest $menafest)
+    {
+        $localCity = City::where('is_local', true)->first();
+        $wasOutgoing = ($menafest->from_city_id == $localCity->id);
 
-    //     $menafest->delete();
+        // Get count of orders for the response message
+        $ordersCount = $menafest->orders()->count();
 
-    //     if ($wasOutgoing) {
-    //         return redirect()->route('menafests.outgoing')
-    //             ->with('success', 'تم حذف المنفست الصادر بنجاح');
-    //     } else {
-    //         return redirect()->route('menafests.incoming')
-    //             ->with('success', 'تم حذف المنفست الوارد بنجاح');
-    //     }
-    // }
+        // Soft delete the menafest (orders will be soft deleted automatically via boot method)
+        $menafest->delete();
+
+        $message = "تم حذف المنفست بنجاح";
+        if ($ordersCount > 0) {
+            $message .= " وتم حذف {$ordersCount} طلب(طلبات) مرتبطة به";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $menafest = Menafest::onlyTrashed()->findOrFail($id);
+
+        // Get count of orders to restore
+        $ordersCount = $menafest->orders()->onlyTrashed()->count();
+
+        // Restore the menafest (orders will be restored automatically via boot method)
+        $menafest->restore();
+
+        $message = "تم استعادة المنفست بنجاح";
+        if ($ordersCount > 0) {
+            $message .= " وتم استعادة {$ordersCount} طلب(طلبات) مرتبطة به";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
+    }
+
+    public function forceDelete($id)
+    {
+        $menafest = Menafest::onlyTrashed()->findOrFail($id);
+
+        // Check if manifest has orders before permanent delete
+        if ($menafest->orders()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف المنفست نهائياً لأنه يحتوي على طلبات'
+            ], 400);
+        }
+
+        $menafest->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف المنفست نهائياً'
+        ]);
+    }
 }

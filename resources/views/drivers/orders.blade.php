@@ -621,7 +621,7 @@
                 checkbox.prop('disabled', true);
 
                 $.ajax({
-                    url: '/drivers/orders/' + orderId + '/toggle-paid',
+                    url: '/manage-orders/' + orderId + '/toggle-paid',
                     type: 'PATCH',
                     success: function (response) {
                         if (response.success) {
@@ -656,7 +656,7 @@
                 checkbox.prop('disabled', true);
 
                 $.ajax({
-                    url: '/drivers/orders/' + orderId + '/toggle-exist',
+                    url: '/manage-orders/' + orderId + '/toggle-exist',
                     type: 'PATCH',
                     success: function (response) {
                         if (response.success) {
@@ -707,7 +707,7 @@
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
                 $.ajax({
-                    url: '/drivers/orders/' + orderId + '/update-notes',
+                    url: '/manage-orders/' + orderId + '/update-notes',
                     type: 'PATCH',
                     data: { notes: newNotes },
                     success: function (response) {

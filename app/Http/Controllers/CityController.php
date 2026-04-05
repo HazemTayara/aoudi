@@ -1,6 +1,6 @@
 <?php
-
 // app/Http/Controllers/CityController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\City;
@@ -9,15 +9,20 @@ use App\Models\Order;
 
 class CityController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Add Request here
     {
-        $cities = City::latest()->paginate(10);
+        // Get only non-local and non-deleted cities
+        $cities = City::where('is_local', false)
+            ->withoutTrashed()
+            ->latest()
+            ->paginate(10);
+
         return view('cities.index', compact('cities'));
     }
 
     public function orders(City $city, Request $request)
     {
-        // getting incomming orders only
+        // getting incoming orders only
         $query = Order::with(['menafest.fromCity', 'menafest.toCity', 'driver'])
             ->incoming()
             ->whereHas('menafest.fromCity', function ($q) use ($city) {
@@ -140,26 +145,92 @@ class CityController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate(['name' => 'required|string|max:255|unique:cities,name']);
+
         City::create($request->all());
+
         return redirect()->route('cities.index')->with('success', 'تم إضافة المدينة بنجاح');
     }
 
     public function edit(City $city)
     {
+        // Prevent editing local city
+        if ($city->is_local) {
+            return redirect()->route('cities.index')->with('error', 'لا يمكن تعديل المدينة الرئيسية');
+        }
+
         return view('cities.edit', compact('city'));
     }
 
     public function update(Request $request, City $city)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate(['name' => 'required|string|max:255|unique:cities,name,' . $city->id]);
+
         $city->update($request->all());
+
         return redirect()->route('cities.index')->with('success', 'تم تحديث المدينة بنجاح');
     }
 
-    // public function destroy(City $city)
-    // {
-    //     $city->delete();
-    //     return redirect()->route('cities.index')->with('success', 'تم حذف المدينة بنجاح');
-    // }
+    public function destroy(City $city)
+    {
+        // Check if city has orders
+        if ($city->hasOrders()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف المدينة لأنها تحتوي على طلبات'
+            ], 400);
+        }
+
+        // Check if it's local city
+        if ($city->is_local) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف المدينة الرئيسية'
+            ], 400);
+        }
+
+        $city->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف المدينة بنجاح'
+        ]);
+    }
+
+    public function show()
+    {
+        $cities = City::onlyTrashed()->latest()->paginate(10);
+        return view('cities.trashed', compact('cities'));
+    }
+
+    public function restore($id)
+    {
+        $city = City::onlyTrashed()->findOrFail($id);
+        $city->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم استعادة المدينة بنجاح'
+        ]);
+    }
+
+    public function forceDelete($id)
+    {
+        $city = City::onlyTrashed()->findOrFail($id);
+
+        // Double check no orders before permanent delete
+        if ($city->hasOrders()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف المدينة نهائياً لأنها تحتوي على طلبات'
+            ], 400);
+        }
+
+        $city->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف المدينة نهائياً'
+        ]);
+    }
 }

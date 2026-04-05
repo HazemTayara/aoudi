@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'menafest_id',
         'driver_id',
@@ -39,6 +42,7 @@ class Order extends Model
         'miscellaneous' => 'decimal:2',
         'discount' => 'decimal:2',
     ];
+    protected $dates = ['deleted_at'];
 
     public function menafest()
     {

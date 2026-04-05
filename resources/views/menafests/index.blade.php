@@ -5,6 +5,26 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>{{ $pageTitle }}</h2>
             <div>
+                @php 
+                    $localCity = App\Models\City::where('is_local', true)->first();
+                    $trashedCount = App\Models\Menafest::onlyTrashed()
+                        ->when($type == 'incoming', function ($q) use ($localCity) {
+                            return $q->where('to_city_id', $localCity->id);
+                        })
+                        ->when($type == 'outgoing', function ($q) use ($localCity) {
+                            return $q->where('from_city_id', $localCity->id);
+                        })
+                        ->count();
+                @endphp
+
+                <a href="{{ $type == 'incoming' ? route('menafests.incoming.trashed') : route('menafests.outgoing.trashed') }}"
+                    class="btn btn-warning me-2">
+                    <i class="fas fa-trash-alt"></i> سلة المحذوفات
+                    @if($trashedCount > 0)
+                        <span class="badge bg-danger ms-1">{{ $trashedCount }}</span>
+                    @endif
+                </a>
+
                 @if ($type == 'outgoing')
                     <a href="{{ route('menafests.create', ['type' => 'outgoing']) }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> إضافة منفست صادر
@@ -31,15 +51,12 @@
         @if(isset($cityStats) && count($cityStats) > 0)
             <div class="row g-3 mb-4">
                 @foreach($cityStats as $cityName => $count)
-
                     <div class="col-md-2">
                         <div class="stat-card p-3 border rounded text-center">
-                            <h4 class="stat-value-sm">{{  $cityName . ' : ' . $count }}</h4>
-
+                            <h4 class="stat-value-sm">{{ $cityName . ' : ' . $count }}</h4>
                         </div>
                     </div>
                 @endforeach
-
             </div>
         @endif
 
@@ -98,10 +115,8 @@
                                 <select class="form-select" name="orders_count_operator" style="max-width: 80px;">
                                     <option value="equal" {{ request('orders_count_operator') == 'equal' ? 'selected' : '' }}>
                                         =</option>
-                                    <option value="more" {{ request('orders_count_operator') == 'more' ? 'selected' : '' }}>>
-                                    </option>
-                                    <option value="less" {{ request('orders_count_operator') == 'less' ? 'selected' : '' }}>
-                                        << /option>
+                                    <option value="more" {{ request('orders_count_operator') == 'more' ? 'selected' : '' }}>></option>
+                                    <option value="less" {{ request('orders_count_operator') == 'less' ? 'selected' : '' }}><</option>
                                 </select>
                                 <input type="number" class="form-control" id="orders_count" name="orders_count"
                                     value="{{ request('orders_count') }}" placeholder="العدد" min="0">
@@ -148,7 +163,7 @@
                                 <th>عدد الطلبات</th>
                                 <th>ملاحظات</th>
                                 <th>تاريخ الإضافة</th>
-                                <th>الإجراءات</th>
+                                <th width="200">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -163,18 +178,33 @@
                                     @endif
                                     <td>{{ $menafest->driver_name }}</td>
                                     <td>{{ $menafest->car }}</td>
-                                    <td>{{ $menafest->orders->count() }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            {{ $menafest->orders->count() }}
+                                        </span>
+                                    </td>
                                     <td>{{ Str::limit($menafest->notes, 30) ?? '—' }}</td>
                                     <td>{{ $menafest->created_at->format('Y-m-d') }}</td>
                                     <td>
-                                        <a href="{{ route('menafests.edit', $menafest) }}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{{ route('menafests.orders.index', ['menafest' => $menafest, 'type' => $type]) }}"
-                                            class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('menafests.edit', $menafest) }}"
+                                                class="btn btn-sm btn-outline-primary" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ route('menafests.orders.index', ['menafest' => $menafest, 'type' => $type]) }}"
+                                                class="btn btn-sm btn-outline-secondary" title="عرض الطلبات">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" 
+                                                class="btn btn-sm btn-outline-danger delete-btn"
+                                                data-id="{{ $menafest->id }}"
+                                                data-code="{{ $menafest->manafest_code }}"
+                                                data-type="{{ $type }}"
+                                                data-orders-count="{{ $menafest->orders->count() }}"
+                                                title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -271,6 +301,20 @@
 
 @push('styles')
     <style>
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            min-width: 35px;
+        }
+        
+        .d-flex {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
         /* Pagination Styles with Rounded Borders */
         :root {
             --pagination-radius: 14px;
@@ -408,6 +452,11 @@
             .page-link.prev-next {
                 min-width: 38px;
             }
+            
+            .btn-sm {
+                min-width: 30px;
+                padding: 0.3rem 0.6rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -450,4 +499,86 @@
             }
         }
     </style>
+@endpush
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+    
+    // Delete button handler
+    $(document).on('click', '.delete-btn', function() {
+        const menafestId = $(this).data('id');
+        const menafestCode = $(this).data('code');
+        const type = $(this).data('type');
+        const ordersCount = $(this).data('orders-count');
+        
+        let warningMessage = '';
+        if (ordersCount > 0) {
+            warningMessage = `<p class="text-danger mt-2"><strong>⚠️ تنبيه:</strong> هذا المنفست يحتوي على <strong>${ordersCount}</strong> طلب(طلبات) وسيتم حذفها معه!</p>`;
+        }
+        
+        Swal.fire({
+            title: 'هل أنت متأكد؟',
+            html: `
+                هل تريد حذف المنفست <strong>${menafestCode}</strong>؟
+                ${warningMessage}
+                <small class="text-muted d-block mt-2">📦 سيتم نقل المنفست والطلبات المرتبطة به إلى سلة المحذوفات</small>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'جاري الحذف...',
+                    text: 'يرجى الانتظار',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                $.ajax({
+                    url: `/menafests/${menafestId}`,
+                    type: 'DELETE',
+                    data: {
+                        type: type,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الحذف',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'حدث خطأ أثناء حذف المنفست';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: errorMessage,
+                            confirmButtonText: 'حسنًا'
+                        });
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
 @endpush

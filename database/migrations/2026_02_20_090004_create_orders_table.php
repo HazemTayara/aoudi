@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->string('recipient'); //المرسل اليه
             $table->enum('pay_type', ['مسبق', 'تحصيل']); // نوع الدفع
             $table->decimal('amount', 10, 2)->default(0); // الملبغ
-            $table->decimal('anti_charger', 10, 2)->default(0); // ضد الشاحن
+            $table->decimal('anti_charger', 10, 2)->default(0); // ضد الشحن
             $table->decimal('transmitted', 10, 2)->default(0); // المحول
             $table->decimal('miscellaneous', 10, 2)->default(0); //متفرقات متنوعة
             $table->decimal('discount', 10, 2)->default(0); // الخصم

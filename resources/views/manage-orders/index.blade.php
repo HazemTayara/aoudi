@@ -12,6 +12,18 @@
                     <p class="text-muted mb-0">عرض وإدارة جميع الطلبات الواردة</p>
                 </div>
             </div>
+
+            <div>
+                @php 
+                    $trashedCount = \App\Models\Order::onlyTrashed()->count();
+                @endphp
+                <a href="{{ route('orders.trashed') }}" class="btn btn-warning me-2">
+                    <i class="fas fa-trash-alt"></i> سلة المحذوفات
+                    @if($trashedCount > 0)
+                        <span class="badge bg-danger ms-1">{{ $trashedCount }}</span>
+                    @endif
+                </a>
+            </div>
         </div>
         <!-- Quick Stats -->
         <div class="row g-3 mb-4">
@@ -64,7 +76,7 @@
                 <div class="stat-card-sm">
                     <div class="d-flex align-items-center justify-content-center gap-2">
                         <i class="fas fa-shield-alt text-primary"></i>
-                        <span class="stat-label-sm">ضد الشاحن ({{ $stats['anti_charger_count'] }})</span>
+                        <span class="stat-label-sm">ضد الشحن ({{ $stats['anti_charger_count'] }})</span>
                     </div>
                     <h4 class="stat-value-sm">{{ format_number($stats['total_anti_charger']) }}</h4>
                 </div>
@@ -211,13 +223,13 @@
                                     value="{{ request('amount_max') }}" placeholder="إلى">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold small">ضد الشاحن من</label>
+                                <label class="form-label fw-bold small">ضد الشحن من</label>
                                 <input type="number" step="0.01" name="anti_charger_min"
                                     class="form-control form-control-sm" value="{{ request('anti_charger_min') }}"
                                     placeholder="من">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold small">ضد الشاحن إلى</label>
+                                <label class="form-label fw-bold small">ضد الشحن إلى</label>
                                 <input type="number" step="0.01" name="anti_charger_max"
                                     class="form-control form-control-sm" value="{{ request('anti_charger_max') }}"
                                     placeholder="إلى">
@@ -318,7 +330,7 @@
                                 <th>المرسل إليه</th>
                                 <th>نوع الدفع</th>
                                 <th>المبلغ</th>
-                                <th>ضد الشاحن</th>
+                                <th>ضد الشحن</th>
                                 <th>المحول</th>
                                 <th>متفرقات</th>
                                 <th>الخصم</th>
@@ -398,11 +410,20 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td>
-                                        <a href="{{ route('orders.edit', $order) }}"
-                                            class="btn btn-sm btn-outline-primary rounded-circle" title="تعديل">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                   <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('orders.edit', $order) }}"
+                                                class="btn btn-sm btn-outline-primary" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                class="btn btn-sm btn-outline-danger delete-btn" 
+                                                data-id="{{ $order->id }}"
+                                                data-number="{{ $order->order_number }}"
+                                                title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -803,6 +824,65 @@
             $.ajaxSetup({
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
             });
+
+            // Delete button handler with SweetAlert
+            $(document).on('click', '.delete-btn', function() {
+                const orderId = $(this).data('id');
+                const orderNumber = $(this).data('number');
+                
+                Swal.fire({
+                    title: 'هل أنت متأكد؟',
+                    html: `هل تريد حذف الطلب رقم <strong>${orderNumber}</strong>؟`,
+                    text: "سيتم نقل الطلب إلى سلة المحذوفات",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'نعم، احذف',
+                    cancelButtonText: 'إلغاء',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'جاري الحذف...',
+                            text: 'يرجى الانتظار',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        $.ajax({
+                            url: `/orders/${orderId}`,
+                            type: 'DELETE',
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'تم الحذف',
+                                    text: response.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                let errorMessage = 'حدث خطأ أثناء حذف الطلب';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'خطأ',
+                                    text: errorMessage,
+                                    confirmButtonText: 'حسنًا'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
             // ─── Toggle is_paid ───
             $(document).on('change', '.toggle-paid', function () {
                 let checkbox = $(this);

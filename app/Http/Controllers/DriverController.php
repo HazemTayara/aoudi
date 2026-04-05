@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/DriverController.php
 
 namespace App\Http\Controllers;
 
@@ -9,8 +10,15 @@ class DriverController extends Controller
 {
     public function index()
     {
-        $drivers = Driver::latest()->paginate(10);
+        // Get only non-deleted drivers
+        $drivers = Driver::withoutTrashed()->latest()->paginate(10);
         return view('drivers.index', compact('drivers'));
+    }
+
+    public function show()
+    {
+        $drivers = Driver::onlyTrashed()->latest('deleted_at')->paginate(10);
+        return view('drivers.trashed', compact('drivers'));
     }
 
     public function create()
@@ -21,7 +29,7 @@ class DriverController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:drivers,name',
             'notes' => 'nullable|string'
         ]);
 
@@ -39,7 +47,7 @@ class DriverController extends Controller
     public function update(Request $request, Driver $driver)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:drivers,name,' . $driver->id,
             'notes' => 'nullable|string'
         ]);
 
@@ -49,11 +57,64 @@ class DriverController extends Controller
             ->with('success', 'تم تحديث بيانات السائق بنجاح');
     }
 
-    // public function destroy(Driver $driver)
-    // {
-    //     $driver->delete();
+    public function destroy(Driver $driver)
+    {
+        // Check if driver has orders
+        if ($driver->hasOrders()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف السائق لأنه مرتبط بطلبات'
+            ], 400);
+        }
 
-    //     return redirect()->route('drivers.index')
-    //         ->with('success', 'تم حذف السائق بنجاح');
-    // }
+        $driver->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف السائق بنجاح'
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $driver = Driver::onlyTrashed()->findOrFail($id);
+        $driver->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم استعادة السائق بنجاح'
+        ]);
+    }
+
+    public function forceDelete($id)
+    {
+        $driver = Driver::onlyTrashed()->findOrFail($id);
+
+        // Double check no orders before permanent delete
+        if ($driver->hasOrders()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف السائق نهائياً لأنه مرتبط بطلبات'
+            ], 400);
+        }
+
+        $driver->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف السائق نهائياً'
+        ]);
+    }
+
+    public function orders(Driver $driver)
+    {
+        $orders = $driver->orders()->latest()->paginate(20);
+        return view('drivers.orders', compact('driver', 'orders'));
+    }
+
+    public function attachOrders(Driver $driver)
+    {
+        // This method will show form to attach orders to driver
+        return view('drivers.attach-orders', compact('driver'));
+    }
 }
