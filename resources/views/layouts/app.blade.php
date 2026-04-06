@@ -612,8 +612,7 @@
                     <span>الطلبات</span>
                 </a>
 
-                <a href=" {{ route('orders.pay') }}"
-                    class="{{ request()->routeIs('orders.pay') ? 'active' : '' }}">
+                <a href=" {{ route('orders.pay') }}" class="{{ request()->routeIs('orders.pay') ? 'active' : '' }}">
                     <i class="fas fa-check"></i>
                     <span>تشطيب</span>
                 </a>
@@ -654,6 +653,24 @@
         <div class="main-content">
             <div class="top-bar">
                 <h1 class="page-title arabic-font">لوحة التحكم الرئيسية</h1>
+
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {{ auth()->user()->name }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ route('profile.show') }}">Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div class="content-area">

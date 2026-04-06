@@ -27,3 +27,30 @@
 إضافة زر الأنتقال إلى سلة المحذوفات للمنفست في صفحة عرض المنفست
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+authentication system:
+I have already created a dashboard project but without an authentication system
+the authentication that I need looks like following:
+There is no regiester
+Only login and a full 'forget-password' system using a typical pattern (the system send 6 digts otp code to the email of the user)
+create all the neccesser middlewares
+
+After that I wanna create crud for Users in the system
+there is no need to verify email 
+and I wanna integrate laratrust package to give new users a role
+for now I need 3 roles
+I wanna add a profile page to show to own details (personal details like name and email) and change password
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+Zum Nachschauen:
+
+ProifileController
+show.blade.php
+app.blade.php
+users/index.blade.php
+users/create.blade.php
+users/edit.blade.php
+ChangePasswordController.php
+ChangePasswordRequest.php
+UserController.php
+UserUpdateRequest.php
+
