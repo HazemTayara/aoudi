@@ -43,14 +43,10 @@ I wanna add a profile page to show to own details (personal details like name an
 ------------------------------------------------------------------------------------------------------------------------------------------------
 Zum Nachschauen:
 
-ProifileController
-show.blade.php
-app.blade.php
 users/index.blade.php
 users/create.blade.php
 users/edit.blade.php
-ChangePasswordController.php
-ChangePasswordRequest.php
 UserController.php
 UserUpdateRequest.php
+UserStoreRequest.php
 

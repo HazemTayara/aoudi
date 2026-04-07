@@ -133,9 +133,7 @@ Route::middleware(['auth'])->group(function () {
     // Profile routes
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
-        Route::put('/', [ProfileController::class, 'update'])->name('update');
-        Route::get('change-password', [ChangePasswordController::class, 'edit'])->name('password.edit');
-        Route::put('change-password', [ChangePasswordController::class, 'update'])->name('password.update');
+        Route::put('change-password', [ProfileController::class, 'changePassword'])->name('password.update');
     });
 
     Route::post('/settings/local-city', [SettingsController::class, 'updateLocalCity'])->name('settings.local-city.update');

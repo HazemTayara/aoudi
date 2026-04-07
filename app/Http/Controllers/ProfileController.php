@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\ChangePasswordRequest;
 
 class ProfileController extends Controller
 {
@@ -17,14 +19,32 @@ class ProfileController extends Controller
         return view('profile.show', compact('user'));
     }
 
-    public function update(Request $request)
+    public function changePassword(ChangePasswordRequest $request)
     {
         $user = auth()->user();
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-        ]);
-        $user->update($request->only('name', 'email'));
-        return back()->with('success', 'Profile updated.');
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => [
+                        'current_password' => ['Current password is incorrect.']
+                    ]
+                ], 422);
+            }
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully.'
+            ]);
+        }
+
+        return back()->with('success', 'تم تغيير كلمة المرور بنجاح');
     }
 }

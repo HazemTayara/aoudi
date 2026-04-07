@@ -640,6 +640,11 @@
                     </div>
                 </div>
 
+                <a href=" {{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                    <i class="fas fa-user"></i>
+                    <span>الملف الشخصي</span>
+                </a>
+
                 <div style="margin-top: auto; padding-top: 20px;">
                     <a href="{{ route('settings.index') }}"
                         class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
