@@ -14,6 +14,9 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ForgotPasswordOtpController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordOtpController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChangePasswordController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -122,17 +125,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/today-stats', [CheckOrderController::class, 'todayStats'])->name('orders.today-stats');
 
     // Users management routes (only for super-admin & admin)
-    Route::resource('users', App\Http\Controllers\Admin\UserController::class)->except(['show']);
+    Route::resource('users', UserController::class)->except(['show']);
 
     // Settings routes
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
     // Profile routes
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show'])->name('show');
-        Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
-        Route::get('change-password', [App\Http\Controllers\ChangePasswordController::class, 'edit'])->name('password.edit');
-        Route::put('change-password', [App\Http\Controllers\ChangePasswordController::class, 'update'])->name('password.update');
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::get('change-password', [ChangePasswordController::class, 'edit'])->name('password.edit');
+        Route::put('change-password', [ChangePasswordController::class, 'update'])->name('password.update');
     });
 
     Route::post('/settings/local-city', [SettingsController::class, 'updateLocalCity'])->name('settings.local-city.update');

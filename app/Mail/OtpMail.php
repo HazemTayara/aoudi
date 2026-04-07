@@ -21,7 +21,7 @@ class OtpMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Reset Your Password - OTP Code')
+        return $this->subject('إعادة تعيين كلمة المرور - رمز التحقق')
             ->markdown('emails.otp');
     }
 }

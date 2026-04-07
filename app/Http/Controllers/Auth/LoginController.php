@@ -25,7 +25,7 @@ class LoginController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials.']);
+        return back()->withErrors(['email' => 'بيانات الاعتماد غير صحيحة'])->withInput($request->only('email'));
     }
 
     public function logout(Request $request)

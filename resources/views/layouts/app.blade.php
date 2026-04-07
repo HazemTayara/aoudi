@@ -659,14 +659,14 @@
                         {{ auth()->user()->name }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ route('profile.show') }}">Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ route('profile.show') }}">الملف الشخصي</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item">Logout</button>
+                                <button type="submit" class="dropdown-item">تسجيل خروج</button>
                             </form>
                         </li>
                     </ul>
