@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('role:super-admin')->only(['index', 'updateLocalCity']);
+
+    }
+
     /**
      * Show the settings page
      */

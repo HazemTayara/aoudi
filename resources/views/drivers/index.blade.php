@@ -16,16 +16,21 @@
                 @php 
                     $trashedCount = \App\Models\Driver::onlyTrashed()->count();
                 @endphp
+
+                @permission('restore-drivers')
                 <a href="{{ route('drivers.trashed') }}" class="btn btn-warning me-2">
                     <i class="fas fa-trash-alt"></i> سلة المحذوفات
                     @if($trashedCount > 0)
                         <span class="badge bg-danger ms-1">{{ $trashedCount }}</span>
                     @endif
                 </a>
+                @endpermission
                 
+                @permission('create-drivers')
                 <a href="{{ route('drivers.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> إضافة سائق
                 </a>
+                @endpermission
             </div>
         </div>
 
@@ -80,16 +85,20 @@
                                                     class="btn btn-sm btn-outline-primary" title="إسناد طلبات">
                                                     <i class="fas fa-link"></i> إسناد
                                                 </a>
+                                               @permission('edit-drivers')
                                                 <a href="{{ route('drivers.edit', $driver) }}"
                                                     class="btn btn-sm btn-outline-secondary" title="تعديل">
                                                     <i class="fas fa-edit"></i> تعديل
                                                 </a>
+                                                @endpermission
+                                                @permission('delete-drivers')
                                                 <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
                                                     data-id="{{ $driver->id }}"
                                                     data-name="{{ $driver->name }}"
                                                     title="حذف">
                                                     <i class="fas fa-trash"></i> حذف
                                                 </button>
+                                                @endpermission
                                             </div>
                                          </td>
                                      </tr>
@@ -112,9 +121,11 @@
                     <div class="text-center py-5">
                         <i class="fas fa-users fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">لا يوجد سائقين مسجلين</h5>
+                        @permission('create-drivers')
                         <a href="{{ route('drivers.create') }}" class="btn btn-primary mt-2">
                             <i class="fas fa-plus"></i> إضافة سائق جديد
                         </a>
+                        @endpermission
                     </div>
                 @endif
             </div>

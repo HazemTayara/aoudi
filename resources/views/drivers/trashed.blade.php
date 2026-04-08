@@ -81,16 +81,20 @@
                                         <td>
                                             <div class="d-flex gap-2">
                                                 {{-- Restore button --}}
+                                                @permission('restore-drivers')
                                                 <button type="button" class="btn btn-sm btn-success restore-btn"
                                                     data-id="{{ $driver->id }}" data-name="{{ $driver->name }}">
                                                     <i class="fas fa-undo"></i> استعادة
                                                 </button>
+                                                @endpermission
 
                                                 {{-- Force delete button --}}
+                                                @permission('force-delete-drivers')
                                                 <button type="button" class="btn btn-sm btn-danger force-delete-btn"
                                                     data-id="{{ $driver->id }}" data-name="{{ $driver->name }}">
                                                     <i class="fas fa-trash-alt"></i> حذف نهائي
                                                 </button>
+                                                @endpermission
                                             </div>
                                         </td>
                                     </tr>

@@ -11,11 +11,14 @@ class UserUpdateRequest extends FormRequest
     {
         return true;
     }
+
     public function rules()
     {
+        $userId = $this->route('user')->id;
+
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email,' . $userId,
             'password' => ['nullable', 'confirmed', Password::defaults()],
             'role' => 'required|exists:roles,name',
         ];

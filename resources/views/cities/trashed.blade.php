@@ -73,16 +73,20 @@
                                         <td>
                                             <div class="d-flex gap-2">
                                                 {{-- Restore button --}}
+                                                @permission('restore-cities')
                                                 <button type="button" class="btn btn-sm btn-success restore-btn"
                                                     data-id="{{ $city->id }}" data-name="{{ $city->name }}">
                                                     <i class="fas fa-undo"></i> استعادة
                                                 </button>
+                                                @endpermission
 
                                                 {{-- Force delete button (permanent) --}}
+                                                @permission('force-delete-cities')
                                                 <button type="button" class="btn btn-sm btn-danger force-delete-btn"
                                                     data-id="{{ $city->id }}" data-name="{{ $city->name }}">
                                                     <i class="fas fa-trash-alt"></i> حذف نهائي
                                                 </button>
+                                                @endpermission
                                             </div>
                                         </td>
                                     </tr>

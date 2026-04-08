@@ -9,6 +9,17 @@ use App\Models\Order;
 
 class CityController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:restore-cities')->only(['show']);
+        $this->middleware('permission:create-cities')->only(['create', 'store']);
+        $this->middleware('permission:edit-cities')->only(['edit', 'update']);
+        $this->middleware('permission:delete-cities')->only(['destroy']);
+        $this->middleware('permission:force-delete-cities')->only(['forceDelete']);
+        $this->middleware('permission:restore-cities')->only(['restore']);
+    }
+
     public function index(Request $request) // Add Request here
     {
         // Get only non-local and non-deleted cities

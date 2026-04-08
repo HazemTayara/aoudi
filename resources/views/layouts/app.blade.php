@@ -645,6 +645,12 @@
                     <span>الملف الشخصي</span>
                 </a>
 
+                <a href=" {{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>المستخدمين</span>
+                </a>
+
+                @role('super-admin')
                 <div style="margin-top: auto; padding-top: 20px;">
                     <a href="{{ route('settings.index') }}"
                         class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
@@ -652,6 +658,7 @@
                         <span>الإعدادات</span>
                     </a>
                 </div>
+                @endrole
             </nav>
         </div>
 

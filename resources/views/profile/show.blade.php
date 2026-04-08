@@ -10,7 +10,8 @@
                     </div>
                     <h3 class="mb-1">{{ $user->name }}</h3>
                     <p class="text-muted">{{ $user->email }}</p>
-                    <span class="badge bg-secondary">عضو</span>
+                    <span class="badge bg-secondary"
+                        style="font-size: 16px">{{ $user->roles->first()->display_name }}</span>
                 </div>
 
                 {{-- Profile Information Card --}}
@@ -211,10 +212,10 @@
                 alert.className = `alert alert-${type} alert-dismissible fade show mt-4 shadow-sm`;
                 alert.role = 'alert';
                 alert.innerHTML = `
-                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
+                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
 
                 alertContainer.appendChild(alert);
 

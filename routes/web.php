@@ -16,7 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordOtpController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ChangePasswordController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -28,7 +28,7 @@ use App\Http\Controllers\ChangePasswordController;
 |
 */
 
-// Guest routes (no auth)
+/* Guest routes (no auth) */
 Route::middleware('guest')->group(function () {
     // Login
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -54,17 +54,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [HomeController::class, 'index']);
 
     // Cities routes
-    Route::resource('cities', CityController::class);
-    Route::get('cities/trashed', [CityController::class, 'show'])->name('cities.trashed');
-    Route::put('cities/{id}/restore', [CityController::class, 'restore'])->name('cities.restore');
-    Route::delete('cities/{id}/force-delete', [CityController::class, 'forceDelete'])->name('cities.force-delete');
+    Route::get('cities', [CityController::class, 'index'])->name('cities.index');
+    Route::get('cities/create', [CityController::class, 'create'])->name('cities.create')->middleware('permission:create-cities');
+    Route::post('cities', [CityController::class, 'store'])->name('cities.store')->middleware('permission:create-cities');
+    Route::get('cities/{city}/edit', [CityController::class, 'edit'])->name('cities.edit')->middleware('permission:edit-cities');
+    Route::put('cities/{city}', [CityController::class, 'update'])->name('cities.update')->middleware('permission:edit-cities');
+    Route::delete('cities/{city}', [CityController::class, 'destroy'])->name('cities.destroy')->middleware('permission:delete-cities');
+    Route::get('cities/trashed', [CityController::class, 'show'])->name('cities.trashed')->middleware('permission:restore-cities');
+    Route::put('cities/{id}/restore', [CityController::class, 'restore'])->name('cities.restore')->middleware('permission:restore-cities');
+    Route::delete('cities/{id}/force-delete', [CityController::class, 'forceDelete'])->name('cities.force-delete')->middleware('permission:force-delete-cities');
     Route::get('cities/{city}/orders', [CityController::class, 'orders'])->name('cities.orders');
 
     // Drivers routes
-    Route::resource('drivers', DriverController::class);
-    Route::get('drivers/trashed', [DriverController::class, 'show'])->name('drivers.trashed');
-    Route::put('drivers/{id}/restore', [DriverController::class, 'restore'])->name('drivers.restore');
-    Route::delete('drivers/{id}/force-delete', [DriverController::class, 'forceDelete'])->name('drivers.force-delete');
+    Route::get('drivers', [DriverController::class, 'index'])->name('drivers.index');
+    Route::get('drivers/create', [DriverController::class, 'create'])->name('drivers.create')->middleware('permission:create-drivers');
+    Route::post('drivers', [DriverController::class, 'store'])->name('drivers.store')->middleware('permission:create-drivers');
+    Route::get('drivers/{driver}/edit', [DriverController::class, 'edit'])->name('drivers.edit')->middleware('permission:edit-drivers');
+    Route::put('drivers/{driver}', [DriverController::class, 'update'])->name('drivers.update')->middleware('permission:edit-drivers');
+    Route::delete('drivers/{driver}', [DriverController::class, 'destroy'])->name('drivers.destroy')->middleware('permission:delete-drivers');
+    Route::get('drivers/trashed', [DriverController::class, 'show'])->name('drivers.trashed')->middleware('permission:restore-drivers');
+    Route::put('drivers/{id}/restore', [DriverController::class, 'restore'])->name('drivers.restore')->middleware('permission:restore-drivers');
+    Route::delete('drivers/{id}/force-delete', [DriverController::class, 'forceDelete'])->name('drivers.force-delete')->middleware('permission:force-delete-drivers');
 
     // Menafests routes
     Route::prefix('menafests')->name('menafests.')->group(function () {
@@ -124,11 +134,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders/search', [CheckOrderController::class, 'search'])->name('orders.search');
     Route::get('/orders/today-stats', [CheckOrderController::class, 'todayStats'])->name('orders.today-stats');
 
-    // Users management routes (only for super-admin & admin)
-    Route::resource('users', UserController::class)->except(['show']);
-
-    // Settings routes
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::middleware(['role:super-admin'])->group(function () {
+        // Users management routes (only for super-admin & admin)
+        Route::resource('users', UserController::class)->except(['show']);
+        // Settings routes (only for super-admin)
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/local-city', [SettingsController::class, 'updateLocalCity'])->name('settings.local-city.update');
+    });
 
     // Profile routes
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -136,7 +148,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('change-password', [ProfileController::class, 'changePassword'])->name('password.update');
     });
 
-    Route::post('/settings/local-city', [SettingsController::class, 'updateLocalCity'])->name('settings.local-city.update');
+
+
 
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 

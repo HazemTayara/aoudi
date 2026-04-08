@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:restore-drivers')->only(['show']);
+        $this->middleware('permission:create-drivers')->only(['create', 'store']);
+        $this->middleware('permission:edit-drivers')->only(['edit', 'update']);
+        $this->middleware('permission:delete-drivers')->only(['destroy']);
+        $this->middleware('permission:force-delete-drivers')->only(['forceDelete']);
+        $this->middleware('permission:restore-drivers')->only(['restore']);
+    }
+
     public function index()
     {
         // Get only non-deleted drivers

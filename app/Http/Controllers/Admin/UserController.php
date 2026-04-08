@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Laratrust\Models\Role;
 
 class UserController extends Controller
@@ -13,12 +14,12 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('role:super-admin|admin'); // only super-admin & admin can access
+        $this->middleware('role:super-admin');
     }
 
     public function index()
     {
-        $users = User::with('roles')->paginate(15);
+        $users = User::with('roles')->where('email', '!=',Auth::user()->email)->paginate(15);
         return view('users.index', compact('users'));
     }
 
