@@ -58,6 +58,7 @@
                                     <th width="50">#</th>
                                     <th>اسم السائق</th>
                                     <th>عدد طلبات اليوم</th>
+                                    <th>لم يسلَّم</th>
                                     <th>ملاحظات</th>
                                     <th>تاريخ الإضافة</th>
                                     <th width="450">الإجراءات</th>
@@ -70,8 +71,16 @@
                                         <td>{{ $driver->name }}</td>
                                         <td>
                                             <span class="badge bg-primary text-white px-3 py-2 rounded-pill">
-                                                {{ $driver->orders->where('created_at', '>=', now()->startOfDay())->count() }}
+                                                {{ $driver->orders->where('assigned_at', '>=', now()->startOfDay())->count() }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            <form action="{{ route('drivers.orders', $driver) }}" method="get">
+                                                <button type="submit" class="badge bg-danger text-white px-3 py-2 rounded-pill border-0" style="cursor: pointer;">
+                                                    {{ $driver->orders->where('is_paid', false)->where('driver_id', $driver->id)->count() }}
+                                                </button>
+                                                <input type="hidden" name="status" value="undelivered">
+                                            </form>
                                         </td>
                                         <td>{{ $driver->notes ?? '—' }}</td>
                                         <td>{{ $driver->created_at->format('Y-m-d') }}</td>

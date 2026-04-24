@@ -175,10 +175,18 @@
                                 <input type="text" name="recipient" class="form-control form-control-sm"
                                     value="{{ request('recipient') }}" placeholder="بحث...">
                             </div>
-                            <div class="col-md-2">
+                            {{-- <div class="col-md-2">
                                 <label class="form-label fw-bold small">كود المنافست</label>
                                 <input type="text" name="menafest_code" class="form-control form-control-sm"
                                     value="{{ request('menafest_code') }}" placeholder="بحث...">
+                            </div> --}}
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small">مكان التسليم</label>
+                                <select name="pay_place" class="form-control form-control-sm">
+                                    <option value="">الكل</option>
+                                    <option value="1" {{ request('pay_place') === '1' ? 'selected' : '' }}>مكتب</option>
+                                    <option value="0" {{ request('pay_place') === '0' ? 'selected' : '' }}>توزيع</option>
+                                </select>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label fw-bold small">اسم السائق</label>

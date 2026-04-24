@@ -113,10 +113,14 @@ class CityController extends Controller
 
         if ($request->filled('created_from')) {
             $query->whereDate('created_at', '>=', $request->created_from);
+        } else {
+            $query->whereDate('created_at', '>=', today());
         }
 
         if ($request->filled('created_to')) {
             $query->whereDate('created_at', '<=', $request->created_to);
+        } else {
+            $query->whereDate('created_at', '<=', today());
         }
 
         // ─── Compute stats from the filtered query (before pagination) ───

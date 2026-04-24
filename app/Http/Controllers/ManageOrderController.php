@@ -37,10 +37,18 @@ class ManageOrderController extends Controller
             $query->where('recipient', 'like', '%' . $request->recipient . '%');
         }
 
-        if ($request->filled('menafest_code')) {
-            $query->whereHas('menafest', function ($q) use ($request) {
-                $q->where('manafest_code', 'like', '%' . $request->menafest_code . '%');
-            });
+        // if ($request->filled('menafest_code')) {
+        //     $query->whereHas('menafest', function ($q) use ($request) {
+        //         $q->where('manafest_code', 'like', '%' . $request->menafest_code . '%');
+        //     });
+        // }
+
+        if ($request->filled('pay_place')) {
+            if ($request->pay_place == 1) {
+                $query->doesntHave('driver'); // مكتب
+            } else if ($request->pay_place == 0) {
+                $query->has('driver'); // توزيع
+            }
         }
 
         if ($request->filled('driver_name')) {

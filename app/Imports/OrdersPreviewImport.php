@@ -118,7 +118,7 @@ class OrdersPreviewImport implements ToCollection, WithHeadingRow
             $orderNumber = isset($row['rkm_alashaaar']) ? $row['rkm_alashaaar'] : $row['almtslsl'] ?? '';
 
             $order = [
-                'order_number' => trim($orderNumber),
+                'order_number' => intval(trim($orderNumber)),
                 'content' => trim($row['noaa_altrd'] ?? 'طرد'),
                 'count' => is_numeric($row['alkmy'] ?? null) ? intval($row['alkmy']) : 1,
                 'sender' => trim($row['almrsl'] ?? ''),

@@ -302,24 +302,28 @@ class MenafestController extends Controller
      */
     public function destroy(Menafest $menafest)
     {
-        $localCity = City::where('is_local', true)->first();
-        $wasOutgoing = ($menafest->from_city_id == $localCity->id);
+        try {
+            $localCity = City::where('is_local', true)->first();
+            $wasOutgoing = ($menafest->from_city_id == $localCity->id);
 
-        // Get count of orders for the response message
-        $ordersCount = $menafest->orders()->count();
+            // Get count of orders for the response message
+            $ordersCount = $menafest->orders()->count();
 
-        // Soft delete the menafest (orders will be soft deleted automatically via boot method)
-        $menafest->delete();
+            // Soft delete the menafest (orders will be soft deleted automatically via boot method)
+            $menafest->delete();
 
-        $message = "تم حذف المنفست بنجاح";
-        if ($ordersCount > 0) {
-            $message .= " وتم حذف {$ordersCount} طلب(طلبات) مرتبطة به";
+            $message = "تم حذف المنفست بنجاح";
+            if ($ordersCount > 0) {
+                $message .= " وتم حذف {$ordersCount} طلب(طلبات) مرتبطة به";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        } catch (\Throwable $th) {
+                Log::error($th->getMessage());
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => $message
-        ]);
     }
 
     public function restore($id)

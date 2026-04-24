@@ -36,7 +36,7 @@
                         <div class="col-md-3">
                             <label class="form-label fw-bold small">رقم الإيصال</label>
                             <input type="text" name="order_number" class="form-control"
-                                value="{{ request('order_number') }}" placeholder="بحث...">
+                                value="{{ request('order_number') }}" placeholder="بحث..." autofocus>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold small">المرسل</label>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Orders Table -->
-        <form action="{{ route('drivers.attach-orders.store', $driver) }}" method="POST" id="attachForm">
+        <form action="{{ route('drivers.attach-orders.store', $driver) }}" method="POST">
             @csrf
 
             <!-- Sticky action bar -->
@@ -113,10 +113,17 @@
                                 @forelse($orders as $order)
                                     <tr>
                                         <td>
-                                            <div class="form-check">
+                                            {{-- <div class="form-check">
                                                 <input class="form-check-input order-checkbox" type="checkbox"
                                                     name="order_ids[]" value="{{ $order->id }}">
-                                            </div>
+                                            </div> --}}
+
+                                            @if (count($orders) <= 5)
+                                                <button type="submit" class="btn btn-success px-4 rounded-pill" name="order_id"
+                                                    value="{{ $order->id }}">
+                                                    <i class="fas fa-link me-2"></i>
+                                                </button>
+                                            @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill">
@@ -484,40 +491,6 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            function updateSelectedCount() {
-                let count = $('.order-checkbox:checked').length;
-                $('#selectedCount').text('تم اختيار: ' + count);
-                $('#attachBtn').prop('disabled', count === 0);
-            }
-
-            // Select all checkbox
-            // $('#selectAll').on('change', function () {
-            //     $('.order-checkbox').prop('checked', $(this).is(':checked'));
-            //     updateSelectedCount();
-            // });
-
-            // Individual checkbox
-            $(document).on('change', '.order-checkbox', function () {
-                let total = $('.order-checkbox').length;
-                let checked = $('.order-checkbox:checked').length;
-                // $('#selectAll').prop('checked', total === checked);
-                updateSelectedCount();
-            });
-
-            // Confirm before submit
-            $('#attachForm').on('submit', function (e) {
-                let count = $('.order-checkbox:checked').length;
-                if (count === 0) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'لم يتم اختيار طلبات',
-                        text: 'يرجى اختيار طلب واحد على الأقل',
-                    });
-                    return false;
-                }
-            });
-        });
+        
     </script>
 @endpush

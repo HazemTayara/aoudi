@@ -30,7 +30,7 @@ class CheckOrderController extends Controller
 
         // Search only in incoming orders (to_city_id is local city)
         $order = Order::with(['menafest.fromCity', 'menafest.toCity', 'driver'])
-            ->where('order_number', 'LIKE', '%' . $request->number . '%')
+            ->where('order_number', $request->number)
             ->whereBetween('created_at', [now()->subDays(14), now()])
             ->whereHas('menafest', function ($query) use ($localCity) {
                 $query->where('to_city_id', $localCity->id);

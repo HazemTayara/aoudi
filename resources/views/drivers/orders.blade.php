@@ -35,33 +35,37 @@
             <div class="col-md-2">
                 <div class="stat-card-sm">
                     <span class="stat-label-sm">إجمالي الطلبات</span>
-                    <h4 class="stat-value-sm">{{ format_number($orders->total()) }}</h4>
+                    <h4 class="stat-value-sm">{{ format_number($stats['total']) }}</h4>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="stat-card-sm">
                     <span class="stat-label-sm">مدفوع</span>
-                    <h4 class="stat-value-sm text-success">{{ format_number($orders->where('is_paid', true)->count()) }}
-                    </h4>
+                    <h4 class="stat-value-sm text-success">{{ format_number($stats['paid_count']) }}</h4>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="stat-card-sm">
                     <span class="stat-label-sm">غير مدفوع</span>
-                    <h4 class="stat-value-sm text-danger">{{ format_number($orders->where('is_paid', false)->count()) }}
-                    </h4>
+                    <h4 class="stat-value-sm text-danger">{{ format_number($stats['unpaid_count']) }}</h4>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="stat-card-sm">
                     <span class="stat-label-sm">موجود</span>
-                    <h4 class="stat-value-sm text-info">{{ format_number($orders->where('is_exist', true)->count()) }}</h4>
+                    <h4 class="stat-value-sm text-info">{{ format_number($stats['exist_count']) }}</h4>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="stat-card-sm">
                     <span class="stat-label-sm">إجمالي المبلغ</span>
-                    <h4 class="stat-value-sm">{{ format_number($orders->sum('amount')) }}</h4>
+                    <h4 class="stat-value-sm">{{ format_number($stats['total_amount']) }}</h4>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="stat-card-sm">
+                    <span class="stat-label-sm">إجمالي مبلغ التحصيل</span>
+                    <h4 class="stat-value-sm">{{ format_number($stats['collection_amount']) }}</h4>
                 </div>
             </div>
         </div>
@@ -166,6 +170,7 @@
                                 <th>المرسل إليه</th>
                                 <th>نوع الدفع</th>
                                 <th>المبلغ</th>
+                                <th>الكمية</th>
                                 <th>تم الاستلام</th>
                                 <th>موجود</th>
                                 <th>تاريخ الإسناد</th>
@@ -184,7 +189,8 @@
                                     <td class="fw-bold">{{ $order->order_number }}</td>
                                     <td>
                                         @if($order->menafest)
-                                            <small class="text-muted">{{ $order->menafest->manafest_code }}</small>
+                                            <small class="text-muted">{{ $order->menafest->manafest_code }} |
+                                                {{ $order->menafest->fromCity->name }}</small>
                                         @else
                                             —
                                         @endif
@@ -199,6 +205,7 @@
                                         @endif
                                     </td>
                                     <td>{{ format_number($order->amount) }}</td>
+                                    <td>{{ format_number($order->count) }}</td>
                                     <td>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input toggle-paid" type="checkbox"

@@ -15,12 +15,46 @@ class DriverOrderController extends Controller
      */
     public function index(Driver $driver, Request $request)
     {
-        $query = $driver->orders()->with('menafest.fromCity', 'menafest.toCity');
+        // Base query with all filters
+        $baseQuery = $driver->orders()->with('menafest.fromCity', 'menafest.toCity');
 
+        // Apply status filter first unpaid to optimize query
+        if ($request->has('status')) {
+            if ($request->status === 'undelivered') {
+                $baseQuery->where('is_paid', false);
+            }
+        }
+
+        // Apply all filters to base query
+        $this->applyFilters($baseQuery, $request);
+
+        // Clone the query for stats before pagination
+        $statsQuery = clone $baseQuery;
+
+        // Get paginated orders
+        $orders = $baseQuery->latest('assigned_at')->paginate(50)->appends($request->query());
+
+        // Calculate stats from the full filtered result
+        $stats = [
+            'total' => $statsQuery->count(),
+            'paid_count' => (clone $statsQuery)->where('is_paid', true)->count(),
+            'unpaid_count' => (clone $statsQuery)->where('is_paid', false)->count(),
+            'exist_count' => (clone $statsQuery)->where('is_exist', true)->count(),
+            'total_amount' => (clone $statsQuery)->sum('amount'),
+            'collection_amount' => (clone $statsQuery)->where('pay_type', 'تحصيل')->sum('amount'),
+        ];
+
+        return view('drivers.orders', compact('driver', 'orders', 'stats'));
+    }
+
+    // Helper method to apply filters
+    private function applyFilters($query, Request $request)
+    {
         // Filter: assigned_at date range
         if ($request->filled('assigned_from')) {
             $query->whereDate('assigned_at', '>=', $request->assigned_from);
         }
+
         if ($request->filled('assigned_to')) {
             $query->whereDate('assigned_at', '<=', $request->assigned_to);
         }
@@ -71,9 +105,7 @@ class DriverOrderController extends Controller
             $query->where('recipient', 'like', '%' . $request->recipient . '%');
         }
 
-        $orders = $query->latest('assigned_at')->paginate(50)->appends($request->query());
-
-        return view('drivers.orders', compact('driver', 'orders'));
+        return $query;
     }
 
     /**
@@ -118,27 +150,26 @@ class DriverOrderController extends Controller
     {
         try {
             $request->validate([
-                'order_ids' => 'required|array|min:1',
-                'order_ids.*' => 'exists:orders,id',
+                'order_id' => 'required|exists:orders,id',
             ]);
 
             $now = Carbon::now();
 
-            Order::whereIn('id', $request->order_ids)
+            Order::where('id', $request->order_id)
                 ->whereNull('driver_id')
                 ->update([
                     'driver_id' => $driver->id,
                     'assigned_at' => $now,
                 ]);
 
-            $count = count($request->order_ids);
+
 
             return redirect()->route('drivers.attach-orders', $driver)
-                ->with('success', "تم إسناد {$count} طلب للسائق {$driver->name} بنجاح");
+                ->with('success', "تم إسناد للسائق {$driver->name} بنجاح");
         } catch (\Throwable $th) {
             Log::error('Error attaching orders to driver: ' . $th->getMessage(), [
                 'driver_id' => $driver->id,
-                'order_ids' => $request->order_ids ?? null,
+
             ]);
         }
     }

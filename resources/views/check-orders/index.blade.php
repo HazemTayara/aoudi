@@ -40,6 +40,9 @@
                                 <span>
                                     <span class="badge bg-light text-dark ms-2" id="orderNumber"></span>
                                     <span class="badge bg-info" id="manifestCode"></span>
+                                    <a href="#" id="editOrderBtn" class="btn btn-sm btn-light ms-2" style="display: none;">
+                                        <i class="fas fa-edit"></i> تعديل
+                                    </a>
                                 </span>
                             </div>
                             <div class="card-body">
@@ -288,6 +291,11 @@
             // Display order function - updated to use formatNumber without currency
             function displayOrder(order) {
                 currentOrderId = order.id;
+
+                // Set edit button URL
+                const editBtn = document.getElementById('editOrderBtn');
+                editBtn.href = `/orders/${order.id}/edit`;
+                editBtn.style.display = 'inline-block';
 
                 // Basic info
                 orderNumberSpan.textContent = order.order_number;

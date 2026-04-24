@@ -135,7 +135,7 @@
             </div>
             <div class="collapse show" id="filterCollapse">
                 <div class="card-body pt-0">
-                    <form method="GET" action="{{ route('manage-orders.index') }}" id="filterForm">
+                    <form method="GET" action="{{ route('cities.orders', $city) }}" id="filterForm">
                         <div class="row g-3">
                             <!-- Text search fields -->
                             <div class="col-md-2">
@@ -268,12 +268,12 @@
                             <div class="col-md-2">
                                 <label class="form-label fw-bold small">تاريخ الإنشاء من</label>
                                 <input type="date" name="created_from" class="form-control form-control-sm"
-                                    value="{{ request('created_from') }}">
+                                    value="{{ request('created_from') }} }}">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label fw-bold small">تاريخ الإنشاء إلى</label>
                                 <input type="date" name="created_to" class="form-control form-control-sm"
-                                    value="{{ request('created_to') }}">
+                                    value="{{ request('created_to') }} }}">
                             </div>
                             <!-- Notes search -->
                             <div class="col-md-3">
@@ -283,7 +283,7 @@
                             </div>
                             <!-- Action buttons -->
                             <div class="col-12 d-flex justify-content-end gap-2 mt-3">
-                                <a href="{{ route('manage-orders.index') }}" class="btn btn-outline-secondary px-4">
+                                <a href="{{ route('cities.orders', $city) }}" class="btn btn-outline-secondary px-4">
                                     <i class="fas fa-redo me-2"></i>إعادة ضبط
                                 </a>
                                 <button type="submit" class="btn btn-primary px-5">
