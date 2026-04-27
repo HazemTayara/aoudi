@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\City;
+use App\Models\Driver;
 use Illuminate\Support\Facades\DB;
+
 class CheckOrderController extends Controller
 {
     public function payIndex()
@@ -23,30 +25,47 @@ class CheckOrderController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'number' => 'required|string'
+            'search' => 'required|string|min:2'
         ]);
 
         $localCity = City::where('is_local', true)->first();
+        $searchTerm = $request->search;
 
-        // Search only in incoming orders (to_city_id is local city)
-        $order = Order::with(['menafest.fromCity', 'menafest.toCity', 'driver'])
-            ->where('order_number', $request->number)
-            ->whereBetween('created_at', [now()->subDays(14), now()])
+        // Search incoming orders (to_city_id is local city)
+        $query = Order::with(['menafest.fromCity', 'menafest.toCity', 'driver'])
             ->whereHas('menafest', function ($query) use ($localCity) {
                 $query->where('to_city_id', $localCity->id);
             })
-            ->first();
+            ->whereBetween('created_at', [now()->subDays(14), now()])
+            ->where(function ($q) use ($searchTerm) {
+                $q->where('order_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('recipient', 'like', '%' . $searchTerm . '%');
+            });
 
-        if (!$order) {
+        $orders = $query->latest()->get();
+
+        if ($orders->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'لم يتم العثور على طلب وارد بهذا الرقم'
+                'message' => 'لم يتم العثور على طلبات واردة تطابق بحثك'
             ]);
         }
 
+        if ($orders->count() === 1) {
+            // Return single order details
+            return response()->json([
+                'success' => true,
+                'type' => 'single',
+                'order' => $orders->first()
+            ]);
+        }
+
+        // Return multiple orders for table display
         return response()->json([
             'success' => true,
-            'order' => $order
+            'type' => 'multiple',
+            'orders' => $orders,
+            'count' => $orders->count()
         ]);
     }
 

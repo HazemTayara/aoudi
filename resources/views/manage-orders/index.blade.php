@@ -344,6 +344,7 @@
                                 <th>الخصم</th>
                                 <th>تم الاستلام</th>
                                 <th>موجود</th>
+                                <th>تاريخ الإنشاء</th>
                                 <th>السائق</th>
                                 <th style="min-width: 200px;">ملاحظات</th>
                                 <th>الإجراءات</th>
@@ -391,7 +392,7 @@
                                                 data-id="{{ $order->id }}" {{ $order->is_paid ? 'checked' : '' }}>
                                         </div>
                                         <small class="text-muted d-block paid-date-{{ $order->id }}">
-                                            {{ $order->paid_at ? $order->paid_at->format('Y-m-d H:i') : '' }}
+                                            {{ $order->paid_at ? arabic_date_time($order->paid_at) : '' }}
                                         </small>
                                     </td>
                                     <td>
@@ -399,6 +400,11 @@
                                             <input class="form-check-input toggle-exist" type="checkbox"
                                                 data-id="{{ $order->id }}" {{ $order->is_exist ? 'checked' : '' }}>
                                         </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted d-block">
+                                            {{ arabic_date($order->created_at) }}
+                                        </small>
                                     </td>
                                     <td>
                                         @if($order->driver)

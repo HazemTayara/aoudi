@@ -113,24 +113,17 @@ class DriverOrderController extends Controller
      */
     public function attachForm(Driver $driver, Request $request)
     {
-        $query = Order::whereNull('driver_id')
-            ->where('is_paid', false)
-            ->where('is_exist', true)
-            ->with('menafest.fromCity', 'menafest.toCity')->incoming();
+        $query = Order::where('is_exist', true)
+            ->with('menafest.fromCity', 'menafest.toCity', 'driver')
+            ->incoming();
 
-        // Search: order_number
-        if ($request->filled('order_number')) {
-            $query->where('order_number', 'like', '%' . $request->order_number . '%');
-        }
-
-        // Search: sender
-        if ($request->filled('sender')) {
-            $query->where('sender', 'like', '%' . $request->sender . '%');
-        }
-
-        // Search: recipient
-        if ($request->filled('recipient')) {
-            $query->where('recipient', 'like', '%' . $request->recipient . '%');
+        // Unified search: search both order_number and recipient
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('order_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('recipient', 'like', '%' . $searchTerm . '%');
+            });
         }
 
         // Filter: pay_type
@@ -140,9 +133,11 @@ class DriverOrderController extends Controller
 
         $orders = $query->latest()->paginate(50)->appends($request->query());
 
-        return view('drivers.attach', compact('driver', 'orders'));
-    }
+        // Only show search results if a search was performed
+        $hasSearch = $request->filled('search');
 
+        return view('drivers.attach', compact('driver', 'orders', 'hasSearch'));
+    }
     /**
      * Attach selected orders to the driver
      */
@@ -155,22 +150,58 @@ class DriverOrderController extends Controller
 
             $now = Carbon::now();
 
-            Order::where('id', $request->order_id)
-                ->whereNull('driver_id')
+            $updated = Order::where('id', $request->order_id)
                 ->update([
                     'driver_id' => $driver->id,
                     'assigned_at' => $now,
                 ]);
 
+            if (!$updated) {
+                // Check if request expects JSON
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'لم يتم العثور على الطلب أو أنه مسند بالفعل'
+                    ], 400);
+                }
 
+                return redirect()->route('drivers.attach-orders', $driver)
+                    ->with('error', 'لم يتم العثور على الطلب أو أنه مسند بالفعل');
+            }
+
+            // Get the order with driver relation
+            $order = Order::with('driver')->find($request->order_id);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "تم إسناد الطلب #{$order->order_number} للسائق {$driver->name} بنجاح",
+                    'order' => [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'driver_name' => $driver->name,
+                    ]
+                ]);
+            }
 
             return redirect()->route('drivers.attach-orders', $driver)
                 ->with('success', "تم إسناد للسائق {$driver->name} بنجاح");
+
         } catch (\Throwable $th) {
             Log::error('Error attaching orders to driver: ' . $th->getMessage(), [
                 'driver_id' => $driver->id,
-
+                'order_id' => $request->order_id ?? null,
             ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء عملية الإسناد'
+                ], 500);
+            }
+
+            return redirect()->route('drivers.attach-orders', $driver)
+                ->with('error', 'حدث خطأ أثناء عملية الإسناد');
         }
     }
 

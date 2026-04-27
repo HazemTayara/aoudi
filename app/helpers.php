@@ -1,4 +1,6 @@
 <?php
+use App\Helpers\DateHelper;
+
 
 if (!function_exists('format_number')) {
     /**
@@ -24,4 +26,26 @@ if (!function_exists('format_number')) {
 
         return $formatted;
     }
+
+    if (!function_exists('arabic_date')) {
+        function arabic_date($date)
+        {
+            return DateHelper::formatArabic($date);
+        }
+    }
+
+    if (!function_exists('arabic_date_time')) {
+        function arabic_date_time($date)
+        {
+            return DateHelper::formatArabicWithTime($date);
+        }
+    }
+
+    if (!function_exists('relative_time')) {
+        function relative_time($date)
+        {
+            return DateHelper::shortRelative($date);
+        }
+    }
+
 }
