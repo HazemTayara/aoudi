@@ -170,10 +170,13 @@
                                 <th>المرسل إليه</th>
                                 <th>نوع الدفع</th>
                                 <th>المبلغ</th>
+                                <th>ضد الشحن</th>
+                                <th>المحول</th>
                                 <th>الكمية</th>
                                 <th>تم الاستلام</th>
                                 <th>موجود</th>
                                 <th>تاريخ الإسناد</th>
+                                <th>تاريخ الإنشاء</th>
                                 <th style="min-width: 200px;">ملاحظات</th>
                                 <th>الإجراءات</th>
                             </tr>
@@ -205,6 +208,8 @@
                                         @endif
                                     </td>
                                     <td>{{ format_number($order->amount) }}</td>
+                                    <td>{{ format_number($order->anti_charger) }}</td>
+                                    <td>{{ format_number($order->transmitted) }}</td>
                                     <td>{{ format_number($order->count) }}</td>
                                     <td>
                                         <div class="form-check form-switch">
@@ -223,7 +228,12 @@
                                     </td>
                                     <td>
                                         <small class="text-muted">
-                                            {{ $order->assigned_at ? $order->assigned_at->format('Y-m-d H:i') : '—' }}
+                                            {{ $order->assigned_at ? arabic_date_time($order->assigned_at) : '—' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $order->assigned_at ? arabic_date($order->created_at) : '—' }}
                                         </small>
                                     </td>
                                     <td>

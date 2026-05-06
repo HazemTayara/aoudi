@@ -25,6 +25,12 @@ class DriverOrderController extends Controller
             }
         }
 
+        if ($request->has('today_assigned')) {
+            if ($request->today_assigned) {
+                $baseQuery->whereDate('assigned_at', Carbon::today());
+            }
+        }
+
         // Apply all filters to base query
         $this->applyFilters($baseQuery, $request);
 
@@ -113,7 +119,7 @@ class DriverOrderController extends Controller
      */
     public function attachForm(Driver $driver, Request $request)
     {
-        $query = Order::where('is_exist', true)
+        $query = Order::where('is_exist', true)->whereBetween('created_at', [now()->subDays(14), now()])
             ->with('menafest.fromCity', 'menafest.toCity', 'driver')
             ->incoming();
 

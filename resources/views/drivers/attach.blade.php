@@ -262,8 +262,10 @@
                                     <th>المرسل</th>
                                     <th>المرسل إليه</th>
                                     <th>نوع الدفع</th>
+                                     <th>العدد</th>
                                     <th>المبلغ</th>
                                     <th>ضد الشحن</th>
+                                    <th>تاريخ الانشاء</th>
                                     <th>السائق الحالي</th>
                                     <th>حالة الدفع</th>
                                     <th>ملاحظات</th>
@@ -329,8 +331,10 @@
                                                 <span class="badge bg-success text-white px-3 py-2 rounded-pill">مسبق</span>
                                             @endif
                                         </td>
+                                        <td>{{ format_number($order->count) }}</td>
                                         <td>{{ format_number($order->amount) }}</td>
                                         <td>{{ format_number($order->anti_charger) }}</td>
+                                        <td>{{ arabic_date($order->created_at) }}</td>
                                         <td id="driver-cell-{{ $order->id }}">
                                             @if($order->driver)
                                                 @if($order->driver_id == $driver->id)

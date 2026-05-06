@@ -617,7 +617,7 @@
                     <span>تشطيب</span>
                 </a>
 
-                <div class="sidebar-dropdown-container">
+                {{-- <div class="sidebar-dropdown-container">
                     <div class="sidebar-dropdown-toggle {{ request()->routeIs('menafests.*') ? 'active' : '' }}"
                         onclick="toggleDropdown(event, this)">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -627,18 +627,20 @@
                         <i class="fas fa-chevron-down dropdown-arrow"></i>
                     </div>
                     <div class="sidebar-dropdown {{ request()->routeIs('menafests.*') ? 'show' : '' }}">
-                        <a href="{{ route('menafests.outgoing') }}"
-                            class="{{ request()->routeIs('menafests.outgoing') ? 'active' : '' }}">
-                            <i class="fas fa-arrow-right"></i>
-                            <span>منافست صادر</span>
-                        </a>
-                        <a href="{{ route('menafests.incoming') }}"
-                            class="{{ request()->routeIs('menafests.incoming') ? 'active' : '' }}">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>منافست وارد</span>
-                        </a>
+
                     </div>
-                </div>
+                </div> --}}
+
+                <a href="{{ route('menafests.outgoing') }}"
+                    class="{{ request()->routeIs('menafests.outgoing') ? 'active' : '' }}">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>منافست صادر</span>
+                </a>
+                <a href="{{ route('menafests.incoming') }}"
+                    class="{{ request()->routeIs('menafests.incoming') ? 'active' : '' }}">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>منافست وارد</span>
+                </a>
 
                 <a href=" {{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
                     <i class="fas fa-user"></i>

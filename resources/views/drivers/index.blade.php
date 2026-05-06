@@ -70,9 +70,12 @@
                                         <td>{{ $drivers->firstItem() + $loop->index }}</td>
                                         <td>{{ $driver->name }}</td>
                                         <td>
-                                            <span class="badge bg-primary text-white px-3 py-2 rounded-pill">
-                                                {{ $driver->orders->where('assigned_at', '>=', now()->startOfDay())->count() }}
-                                            </span>
+                                            <form action="{{ route('drivers.orders', $driver) }}" method="get">
+                                                <button type="submit" class="badge bg-primary text-white px-3 py-2 rounded-pill border-0" style="cursor: pointer;">
+                                                    {{ $driver->orders->where('assigned_at', '>=', now()->startOfDay())->count() }}
+                                                </button>
+                                                <input type="hidden" name="today_assigned" value="1">
+                                            </form>
                                         </td>
                                         <td>
                                             <form action="{{ route('drivers.orders', $driver) }}" method="get">
