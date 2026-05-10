@@ -121,7 +121,6 @@
                                         <th>#</th>
                                         <th>رقم الإيصال</th>
                                         <th>كود المنفيست</th>
-                                        <th>من مدينة</th>
                                         <th>المرسل</th>
                                         <th>المرسل إليه</th>
                                         <th>العدد</th>
@@ -129,6 +128,7 @@
                                         <th>المبلغ</th>
                                         <th>ضد الشحن</th>
                                         <th>محول</th>
+                                        <th>متفرقات</th>
                                         <th>السائق</th>
                                         <th>تاريخ الإنشاء</th>
                                         <th>تاريخ التسليم</th>
@@ -766,7 +766,7 @@
 
                 const paymentStatus = document.getElementById('paymentStatus');
                 if (order.is_paid) {
-                    paymentStatus.textContent = 'مدفوع';
+                    paymentStatus.textContent = 'مدفوع في ' + (order.paid_at ? formatDateArabic(order.paid_at) : '');
                     paymentStatus.className = 'status-badge status-badge--paid';
                     markPaidBtn.disabled = true;
                 } else {
@@ -799,18 +799,18 @@
                         <tr>
                             <td>${index + 1}</td>
                             <td class="fw-bold">${order.order_number}</td>
-                            <td>${order.menafest?.manafest_code || '—'}</td>
-                            <td>${order.menafest?.from_city?.name || '—'}</td>
+                            <td>${order.menafest?.manafest_code || '—'} | ${order.menafest?.from_city?.name || '—'}</td>
                             <td>${order.sender || '—'}</td>
                             <td>${order.recipient || '—'}</td>
-                            <td>${order.count || '—'}</td>
+                            <td>(${order.count || '—'}) ${order.content || '—'}</td>
                             <td>${order.pay_type === 'تحصيل' ? '<span class="badge bg-warning text-dark">تحصيل</span>' : '<span class="badge bg-success">مسبق</span>'}</td>
                             <td>${formatNumber(order.amount)}</td>
                             <td>${order.anti_charger ? formatNumber(order.anti_charger) : '—'}</td>
                             <td>${order.transmitted ? formatNumber(order.transmitted) : '—'}</td>
-                            <td>${order.driver?.name || '—'}</td>
+                            <td>${order.miscellaneous ? formatNumber(order.miscellaneous) : '—'}</td>
+                            <td>${order.driver?.name || '—'} <br> ${order.assigned_at ? formatDateArabic(order.assigned_at) : '—'}</td>
                             <td>${formatDateArabic(order.created_at)}</td>
-                            <td>${order.assigned_at ? formatDateArabic(order.assigned_at) : '—'}</td>
+                            <td>${order.paid_at ? formatDateArabic(order.paid_at) : '—'}</td>
                             <td id="payment-cell-${order.id}">${paidHtml}</td>
                             <td><a href="/orders/${order.id}/edit?return_url=${encodeURIComponent(window.location.href)}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a></td>
                         </tr>

@@ -47,7 +47,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
             // Payment type amounts
             'collection_amount' => $orders->where('pay_type', 'تحصيل')->sum('amount'),
             'prepaid_amount' => $orders->where('pay_type', 'مسبق')->sum('amount'),
-            
+
             // Total sum of all amounts (تحصيل + مسبق)
             'total_sum_amount' => $orders->sum('amount'),
 
@@ -138,25 +138,25 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
     private function calculateOptimalWidth($data, $fontSize = 10, $extraPadding = 1)
     {
         $maxWidth = 0;
-        
+
         foreach ($data as $value) {
             // Convert to string if not already
             $value = (string) $value;
-            
+
             // Calculate width considering Arabic characters (they're wider)
             $length = mb_strlen($value, 'UTF-8');
             $arabicCount = preg_match_all('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}]/u', $value);
             $nonArabicCount = $length - $arabicCount;
-            
+
             // Arabic characters are approximately 1.5 times wider than Latin characters
             $effectiveLength = ($arabicCount * 1.5) + $nonArabicCount;
-            
+
             // Calculate pixel width (approximate: each character at font size 10 is about 7 pixels)
             $width = ($effectiveLength * ($fontSize * 0.7)) / 7;
-            
+
             $maxWidth = max($maxWidth, $width);
         }
-        
+
         // Add padding
         return $maxWidth + $extraPadding;
     }
@@ -211,7 +211,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                     ->setFitToWidth(1)
                     ->setFitToHeight(0)
                     ->setScale(85); // Slightly reduced scale to ensure fit
-
+    
                 // Set margins for better A4 fit (in inches)
                 $spreadsheet->getActiveSheet()
                     ->getPageMargins()
@@ -246,7 +246,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
 
                 // Collect all data for width calculation
                 $columnData = array_fill_keys(array_keys($columnHeaders), []);
-                
+
                 // Add header data
                 foreach ($columnHeaders as $col => $header) {
                     $columnData[$col][] = $header;
@@ -269,11 +269,11 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                         'K' => (string) format_number($order->miscellaneous),
                         'L' => (string) format_number($order->discount),
                     ];
-                    
+
                     foreach ($mappedData as $col => $value) {
                         $columnData[$col][] = $value;
                     }
-                    
+
                     $rowNum++;
                 }
 
@@ -298,10 +298,10 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                     $optimalWidth = $this->calculateOptimalWidth($data, 10, 2);
                     $minWidth = $minWidths[$col] ?? 6;
                     $finalWidth = max($optimalWidth, $minWidth);
-                    
+
                     // Cap maximum width to prevent extremely wide columns
                     $finalWidth = min($finalWidth, 20);
-                    
+
                     $sheet->getColumnDimension($col)->setWidth($finalWidth);
                 }
 
@@ -313,7 +313,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                     // Center align all data cells
                     $sheet->getStyle('A7:L' . $lastRow)->getAlignment()->setHorizontal('center');
                     $sheet->getStyle('A7:L' . $lastRow)->getAlignment()->setVertical('center');
-                    
+
                     // Add borders to data rows
                     $sheet->getStyle('A6:L' . $lastRow)->getBorders()->getAllBorders()
                         ->setBorderStyle(Border::BORDER_THIN);
@@ -321,7 +321,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
 
                 // Add statistics section as a compact centered widget
                 $statsRow = $lastRow + 2;
-                
+
                 // Calculate the middle columns for centering the stats widget
                 // Use columns D through I (6 columns) for the stats widget to keep it centered and compact
                 $statsStartCol = 'D';
@@ -347,7 +347,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $labelRange = $statsStartCol . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $valueRange = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($labelRange);
                 $sheet->mergeCells($valueRange);
                 $sheet->setCellValue($statsStartCol . $currentRow, 'إجمالي عدد الطلبات:');
@@ -363,7 +363,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $labelRange = $statsStartCol . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $valueRange = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($labelRange);
                 $sheet->mergeCells($valueRange);
                 $sheet->setCellValue($statsStartCol . $currentRow, 'إجمالي عدد القطع:');
@@ -379,7 +379,7 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $labelRange = $statsStartCol . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $valueRange = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($labelRange);
                 $sheet->mergeCells($valueRange);
                 $sheet->setCellValue($statsStartCol . $currentRow, 'إجمالي المبلغ الكلي:');
@@ -408,14 +408,14 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $col2Range = $this->incrementColumn($statsStartCol, 1) . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $col3Range = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullHeaderRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($col2Range);
                 $sheet->mergeCells($col3Range);
-                
+
                 $sheet->setCellValue($statsStartCol . $currentRow, 'النوع');
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 1) . $currentRow, 'العدد');
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 3) . $currentRow, 'الإجمالي');
-                
+
                 $sheet->getStyle($fullHeaderRange)->getFont()->setBold(true);
                 $sheet->getStyle($fullHeaderRange)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
@@ -433,10 +433,10 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $col2Range = $this->incrementColumn($statsStartCol, 1) . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $col3Range = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullRowRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($col2Range);
                 $sheet->mergeCells($col3Range);
-                
+
                 $sheet->setCellValue($statsStartCol . $currentRow, 'تحصيل');
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 1) . $currentRow, format_number($this->stats['collection_count']));
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 3) . $currentRow, format_number($this->stats['collection_amount']));
@@ -452,10 +452,10 @@ class ManifestOutgoingExport implements FromCollection, WithHeadings, WithMappin
                 $col2Range = $this->incrementColumn($statsStartCol, 1) . $currentRow . ':' . $this->incrementColumn($statsStartCol, 2) . $currentRow;
                 $col3Range = $this->incrementColumn($statsStartCol, 3) . $currentRow . ':' . $statsEndCol . $currentRow;
                 $fullRowRange = $statsStartCol . $currentRow . ':' . $statsEndCol . $currentRow;
-                
+
                 $sheet->mergeCells($col2Range);
                 $sheet->mergeCells($col3Range);
-                
+
                 $sheet->setCellValue($statsStartCol . $currentRow, 'مسبق');
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 1) . $currentRow, format_number($this->stats['prepaid_count']));
                 $sheet->setCellValue($this->incrementColumn($statsStartCol, 3) . $currentRow, format_number($this->stats['prepaid_amount']));

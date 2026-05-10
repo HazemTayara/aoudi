@@ -12,22 +12,22 @@ class Order extends Model
     protected $fillable = [
         'menafest_id',
         'driver_id',
-        'assigned_at',
-        'order_number', //
-        'content', // 
-        'count', //
-        'sender', //
-        'recipient', // 
-        'pay_type', //
-        'amount', // 
-        'anti_charger', // 
-        'transmitted', //
-        'miscellaneous', //
-        'discount', //
+        'assigned_at', //
+        'order_number',
+        'content',
+        'count',
+        'sender',
+        'recipient',
+        'pay_type',
+        'amount',
+        'anti_charger',
+        'transmitted',
+        'miscellaneous',
+        'discount', // 
         'is_paid',
         'paid_at',
         'is_exist',
-        'notes' //
+        'notes'
     ];
 
     protected $casts = [

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4"dir="rtl">
         <!-- Header -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div class="d-flex align-items-center">
@@ -10,7 +10,8 @@
                 </div>
                 <div>
                     <h2 class="fw-bold mb-1">
-                        إسناد طلبات للسائق: {{ $driver->name }}
+                        إسناد طلبات للسائق:
+                        <span class="text-primary fw-bolder mx-1">{{ $driver->name }}</span>
                     </h2>
                     <p class="text-muted mb-0">ابحث عن الطلبات لإسنادها لهذا السائق</p>
                 </div>
@@ -20,12 +21,12 @@
             </a>
         </div>
 
-        {{-- Toast Notification Container --}}
+        {{-- Toast Container --}}
         <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 9999;">
-            <div id="toastNotification" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastNotification" class="toast align-items-center text-white border-0" role="alert">
                 <div class="d-flex">
                     <div class="toast-body" id="toastMessage"></div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
             </div>
         </div>
@@ -44,9 +45,9 @@
             </div>
         @endif
 
-        <!-- Search Filters -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 py-3">
+        <!-- Search Card -->
+        <div class="card border-0 shadow-lg rounded-4 mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
                 <h5 class="mb-0"><i class="fas fa-search text-primary ms-2"></i>بحث عن طلبات للإسناد</h5>
             </div>
             <div class="card-body">
@@ -54,16 +55,18 @@
                     <div class="row g-3 align-items-end">
                         <div class="col-md-10">
                             <label class="form-label fw-bold small">بحث</label>
-                            <input type="text" name="search" class="form-control form-control-lg"
+                            <input type="text" name="search" class="form-control form-control-lg search-input"
                                 value="{{ request('search') }}" 
-                                placeholder="أدخل رقم الإيصال أو اسم المرسل إليه..." autofocus id="searchInput">
-                            <small class="text-muted">يمكنك البحث برقم الإيصال أو اسم المرسل إليه | اضغط <kbd>Esc</kbd> لبحث جديد</small>
+                                placeholder="أدخل رقم الإيصال أو اسم المرسل إليه..." 
+                                autofocus id="searchInput"
+                                dir="rtl">
+                            <small class="text-muted">يمكنك البحث برقم الإيصال أو اسم المرسل إليه | اضغط <kbd>Esc</kbd> لمسح البحث والبدء من جديد</small>
                         </div>
                         <div class="col-md-2 d-flex gap-2">
-                            <a href="{{ route('drivers.attach-orders', $driver) }}" class="btn btn-outline-secondary flex-grow-1">
+                            <a href="{{ route('drivers.attach-orders', $driver) }}" class="btn btn-outline-secondary flex-grow-1 rounded-3" title="مسح البحث">
                                 <i class="fas fa-redo"></i>
                             </a>
-                            <button type="submit" class="btn btn-primary flex-grow-1">
+                            <button type="submit" class="btn btn-primary flex-grow-1 rounded-3">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
@@ -74,7 +77,7 @@
 
         @if(!$hasSearch)
             {{-- No search performed yet --}}
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body text-center py-5">
                     <i class="fas fa-search fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">ابحث عن الطلبات للإسناد</h5>
@@ -83,7 +86,7 @@
             </div>
         @elseif($orders->isEmpty())
             {{-- No results found --}}
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body text-center py-5">
                     <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">لا توجد طلبات تطابق بحثك</h5>
@@ -91,12 +94,12 @@
                 </div>
             </div>
         @elseif($orders->count() === 1 && $orders->total() === 1)
-            {{-- Single result - show detailed form --}}
+            {{-- Single result - تم تصميم البطاقة المحسنة --}}
             @php 
-                $order = $orders->first();
+                        $order = $orders->first();
                 $canAttach = true;
                 $disableReason = '';
-                
+
                 if ($order->is_paid) {
                     $canAttach = false;
                     $disableReason = 'الطلب مدفوع ولا يمكن إسناده';
@@ -108,10 +111,11 @@
                     $disableReason = "هذا الطلب مسند لسائق آخر: {$order->driver->name}";
                 }
             @endphp
-            <div id="singleOrderCard" class="card border-0 shadow-sm mb-4">
-                <div class="card-header {{ $canAttach ? 'bg-success' : 'bg-warning' }} text-white d-flex justify-content-between align-items-center">
+
+            <div class="card border-0 shadow-lg rounded-4 mb-4" id="singleOrderCard">
+                <div class="card-header {{ $canAttach ? 'bg-success' : 'bg-warning' }} text-white d-flex justify-content-between align-items-center rounded-top-4">
                     <span>
-                        <i class="fas fa-box"></i> تفاصيل الطلب
+                        تفاصيل الطلب
                         @if(!$canAttach)
                             <small class="text-dark ms-2" style="font-size: 0.8em;">({{ $disableReason }})</small>
                         @else
@@ -124,28 +128,62 @@
                                 <i class="fas fa-ban"></i> لا يمكن الإسناد
                             </span>
                         @endif
-                        <span class="badge bg-light text-dark">{{ $order->order_number }}</span>
-                        @if($order->menafest)
-                            <span class="badge bg-info ms-2">{{ $order->menafest->manafest_code }}</span>
-                        @endif
                     </span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">المرسل</small>
-                                <strong>{{ $order->sender }}</strong>
+                    {{-- الصف العلوي: رقم الإيصال، كود المنافست والمدينة --}}
+                    <div class="d-flex align-items-center mb-4">
+                        <h3 class="mb-0 me-3 fw-bold">#{{ $order->order_number }}</h3>
+                        @if($order->menafest)
+                            <span class="badge bg-info fs-6 me-2">{{ $order->menafest->manafest_code }}</span>
+                            <span class="text-muted fs-6">{{ $order->menafest->fromCity->name }}</span>
+                        @endif
+                    </div>
+
+                    {{-- المرسل والمرسل إليه في المنتصف العلوي --}}
+                    <div class="row mb-4">
+                        <div class="col-6 text-center">
+                            <div class="bg-light p-3 rounded-3">
+                                <small class="text-muted d-block mb-1">المرسل</small>
+                                <strong class="fs-5">{{ $order->sender }}</strong>
                             </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">المرسل إليه</small>
-                                <strong>{{ $order->recipient }}</strong>
+                        <div class="col-6 text-center">
+                            <div class="bg-light p-3 rounded-3">
+                                <small class="text-muted d-block mb-1">المرسل إليه</small>
+                                <strong class="fs-5">{{ $order->recipient }}</strong>
                             </div>
                         </div>
-                        <div class="col-md-1 mb-3">
-                            <div class="bg-light p-2 rounded">
+                    </div>
+
+                    {{-- المحتوى والعدد (نفس الأهمية) --}}
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded-3">
+                                <small class="text-muted d-block">المحتوى</small>
+                                <strong class="fs-5">{{ $order->content ?? '—' }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded-3">
+                                <small class="text-muted d-block">العدد</small>
+                                <strong class="fs-5">{{ format_number($order->count) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- المبلغ ونوع الدفع في صف واحد --}}
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded-3">
+                                <small class="text-muted d-block">المبلغ</small>
+                                <strong class="fs-5 {{ $order->amount > 0 ? 'text-success' : '' }}">
+                                    {{ format_number($order->amount) }}
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded-3">
                                 <small class="text-muted d-block">نوع الدفع</small>
                                 <strong>
                                     <span class="badge {{ $order->pay_type == 'تحصيل' ? 'bg-warning text-dark' : 'bg-success' }} px-3 py-2">
@@ -154,76 +192,107 @@
                                 </strong>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">العدد</small>
-                                <strong>{{ $order->count }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">المبلغ</small>
-                                <strong>{{ format_number($order->amount) }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="bg-light p-2 rounded">
+                    </div>
+
+                    {{-- ضد الشحن، المحول، المتنوعات، الخصم (كلها بنفس الأهمية) --}}
+                    <div class="row mb-4">
+                        <div class="col-3">
+                            <div class="bg-light p-2 rounded-3 text-center">
                                 <small class="text-muted d-block">ضد الشحن</small>
-                                <strong>{{ format_number($order->anti_charger) }}</strong>
-                            </div>
-                        </div>
-                         <div class="col-md-3 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">المحول</small>
-                                <strong>{{ format_number($order->transmitted) }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="bg-light p-2 rounded">
-                                <small class="text-muted d-block">السائق الحالي</small>
-                                <strong id="currentDriverName" class="{{ $order->driver_id ? ($order->driver_id == $driver->id ? 'text-warning' : 'text-danger') : 'text-muted' }}">
-                                    {{ $order->driver ? $order->driver->name : 'غير مسند' }}
+                                <strong class="{{ $order->anti_charger > 0 ? 'text-success' : '' }}">
+                                    {{ format_number($order->anti_charger) }}
                                 </strong>
                             </div>
                         </div>
-                        @if($order->is_paid)
-                            <div class="col-12 mb-3">
-                                <div class="alert alert-warning mb-0">
-                                    <i class="fas fa-check-circle"></i> هذا الطلب مدفوع ولا يمكن إسناده
-                                </div>
+                        <div class="col-3">
+                            <div class="bg-light p-2 rounded-3 text-center">
+                                <small class="text-muted d-block">المُحوّل</small>
+                                <strong class="{{ $order->transmitted > 0 ? 'text-success' : '' }}">
+                                    {{ format_number($order->transmitted) }}
+                                </strong>
                             </div>
-                        @endif
-                        @if($order->notes)
-                            <div class="col-12 mb-3">
-                                <div class="bg-light p-2 rounded">
-                                    <small class="text-muted d-block">ملاحظات</small>
-                                    <strong>{{ $order->notes }}</strong>
-                                </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="bg-light p-2 rounded-3 text-center">
+                                <small class="text-muted d-block">متنوعات</small>
+                                <strong class="{{ $order->miscellaneous > 0 ? 'text-success' : '' }}">
+                                    {{ format_number($order->miscellaneous) }}
+                                </strong>
                             </div>
-                        @endif
+                        </div>
+                        <div class="col-3">
+                            <div class="bg-light p-2 rounded-3 text-center">
+                                <small class="text-muted d-block">الخصم</small>
+                                <strong class="{{ $order->discount > 0 ? 'text-success' : '' }}">
+                                    {{ format_number($order->discount) }}
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Attach button with AJAX --}}
+                    {{-- السائق الحالي وتاريخ الإسناد، مع حالة الدفع --}}
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">السائق الحالي:</small>
+                            @if($order->driver)
+                                <strong class="{{ $order->driver_id == $driver->id ? 'text-warning' : 'text-danger' }}">
+                                    {{ $order->driver->name }}
+                                </strong>
+                                @if($order->assigned_at)
+                                    <small class="text-muted d-block">{{ arabic_date_time($order->assigned_at) }}</small>
+                                @endif
+                            @else
+                                <span class="text-muted">غير مسند</span>
+                            @endif
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">حالة الدفع:</small>
+                            @if($order->is_paid)
+                                <span class="badge bg-success">مدفوع</span>
+                                @if($order->paid_at)
+                                    <small class="text-muted d-block">{{ arabic_date_time($order->paid_at) }}</small>
+                                @endif
+                            @else
+                                <span class="badge bg-warning text-dark">غير مدفوع</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- تاريخ الإنشاء --}}
+                    <div class="mb-3">
+                        <small class="text-muted">تاريخ الإنشاء:</small>
+                        <strong>{{ arabic_date($order->created_at) }}</strong>
+                    </div>
+
+                    {{-- ملاحظات (غير مهمة جداً) --}}
+                    @if($order->notes)
+                        <div class="mb-3">
+                            <small class="text-muted">ملاحظات:</small>
+                            <p class="mb-0">{{ $order->notes }}</p>
+                        </div>
+                    @endif
+
+                    {{-- أزرار الإسناد --}}
                     <div class="mt-3">
                         <div class="d-flex gap-2 align-items-center">
                             @if($canAttach)
-                                <button type="button" class="btn btn-success btn-lg px-5 attach-order-btn" 
+                                <button type="button" class="btn btn-success btn-lg px-5 attach-order-btn rounded-3" 
                                     data-order-id="{{ $order->id }}"
                                     data-order-number="{{ $order->order_number }}"
                                     id="attachSingleBtn">
                                     <i class="fas fa-link me-2"></i>إسناد هذا الطلب للسائق
                                 </button>
                                 <a href="{{ route('orders.edit', ['order' => $order->id, 'return_url' => url()->full()]) }}" 
-                                   class="btn btn-outline-primary btn-lg">
+                                   class="btn btn-outline-primary btn-lg rounded-3">
                                     <i class="fas fa-edit me-2"></i>تعديل الطلب
                                 </a>
                                 <small class="text-muted">أو اضغط <kbd>Ctrl</kbd> + <kbd>Enter</kbd></small>
                             @else
-                                <button type="button" class="btn btn-secondary btn-lg px-5" disabled>
+                                <button type="button" class="btn btn-secondary btn-lg px-5 rounded-3" disabled>
                                     <i class="fas fa-ban me-2"></i>{{ $disableReason }}
                                 </button>
                                 <a href="{{ route('orders.edit', ['order' => $order->id, 'return_url' => url()->full()]) }}" 
-                                   class="btn btn-outline-primary btn-lg">
+                                   class="btn btn-outline-primary btn-lg rounded-3">
                                     <i class="fas fa-edit me-2"></i>تعديل الطلب
                                 </a>
                                 <small class="text-muted">اضغط <kbd>Esc</kbd> للبحث عن طلب آخر</small>
@@ -233,8 +302,8 @@
                 </div>
             </div>
         @else
-            {{-- Multiple results - show table --}}
-            <div class="card border-0 shadow-sm mb-3">
+            {{-- Multiple results - enhanced table --}}
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
                 <div class="card-body d-flex justify-content-between align-items-center py-2">
                     <div>
                         <span class="fw-bold">نتائج البحث: {{ $orders->total() }}</span>
@@ -249,11 +318,11 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-lg rounded-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0" id="ordersTable">
-                            <thead class="bg-light">
+                            <thead class="bg-light text-nowrap">
                                 <tr>
                                     <th style="width: 60px;">إسناد</th>
                                     <th>#</th>
@@ -261,11 +330,15 @@
                                     <th>المنافست</th>
                                     <th>المرسل</th>
                                     <th>المرسل إليه</th>
-                                    <th>نوع الدفع</th>
-                                     <th>العدد</th>
+                                    <th>المحتوى</th>
+                                    <th>العدد</th>
                                     <th>المبلغ</th>
+                                    <th>نوع الدفع</th>
                                     <th>ضد الشحن</th>
-                                    <th>تاريخ الانشاء</th>
+                                    <th>المُحوّل</th>
+                                    <th>متنوعات</th>
+                                    <th>الخصم</th>
+                                    <th>تاريخ الإنشاء</th>
                                     <th>السائق الحالي</th>
                                     <th>حالة الدفع</th>
                                     <th>ملاحظات</th>
@@ -277,7 +350,7 @@
                                     @php
                                         $canAttach = true;
                                         $disableTitle = '';
-                                        
+
                                         if ($order->is_paid) {
                                             $canAttach = false;
                                             $disableTitle = 'الطلب مدفوع';
@@ -313,17 +386,19 @@
                                         <td class="fw-bold">{{ $order->order_number }}</td>
                                         <td>
                                             @if($order->menafest)
-                                                <small>
-                                                    {{ $order->menafest->manafest_code }}
-                                                    <br>
-                                                    <span class="text-muted">{{ $order->menafest->fromCity->name }}</span>
-                                                </small>
+                                                <div class="d-flex flex-column">
+                                                    <small class="fw-bold">{{ $order->menafest->manafest_code }}</small>
+                                                    <small class="text-muted">{{ $order->menafest->fromCity->name }}</small>
+                                                </div>
                                             @else
                                                 —
                                             @endif
                                         </td>
                                         <td>{{ $order->sender }}</td>
                                         <td>{{ $order->recipient }}</td>
+                                        <td>{{ $order->content ?? '—' }}</td>
+                                        <td>{{ format_number($order->count) }}</td>
+                                        <td class="{{ $order->amount > 0 ? 'text-success fw-bold' : '' }}">{{ format_number($order->amount) }}</td>
                                         <td>
                                             @if($order->pay_type == 'تحصيل')
                                                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">تحصيل</span>
@@ -331,17 +406,18 @@
                                                 <span class="badge bg-success text-white px-3 py-2 rounded-pill">مسبق</span>
                                             @endif
                                         </td>
-                                        <td>{{ format_number($order->count) }}</td>
-                                        <td>{{ format_number($order->amount) }}</td>
-                                        <td>{{ format_number($order->anti_charger) }}</td>
+                                        <td class="{{ $order->anti_charger > 0 ? 'text-success fw-bold' : '' }}">{{ format_number($order->anti_charger) }}</td>
+                                        <td class="{{ $order->transmitted > 0 ? 'text-success fw-bold' : '' }}">{{ format_number($order->transmitted) }}</td>
+                                        <td class="{{ $order->miscellaneous > 0 ? 'text-success fw-bold' : '' }}">{{ format_number($order->miscellaneous) }}</td>
+                                        <td class="{{ $order->discount > 0 ? 'text-success fw-bold' : '' }}">{{ format_number($order->discount) }}</td>
                                         <td>{{ arabic_date($order->created_at) }}</td>
                                         <td id="driver-cell-{{ $order->id }}">
                                             @if($order->driver)
-                                                @if($order->driver_id == $driver->id)
-                                                    <span class="badge bg-warning text-dark">{{ $order->driver->name }}</span>
-                                                    <small class="text-warning d-block">هذا السائق</small>
-                                                @else
-                                                    <span class="badge bg-danger">{{ $order->driver->name }}</span>
+                                                <strong class="{{ $order->driver_id == $driver->id ? 'text-warning' : 'text-danger' }}">
+                                                    {{ $order->driver->name }}
+                                                </strong>
+                                                @if($order->assigned_at)
+                                                    <small class="text-muted d-block">{{ arabic_date_time($order->assigned_at) }}</small>
                                                 @endif
                                             @else
                                                 <span class="text-muted">—</span>
@@ -350,7 +426,9 @@
                                         <td>
                                             @if($order->is_paid)
                                                 <span class="badge bg-success">مدفوع</span>
-                                                <small class="text-muted d-block">لا يمكن الإسناد</small>
+                                                @if($order->paid_at)
+                                                    <small class="text-muted d-block">{{ arabic_date_time($order->paid_at) }}</small>
+                                                @endif
                                             @else
                                                 <span class="badge bg-warning text-dark">غير مدفوع</span>
                                             @endif
@@ -363,7 +441,7 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('orders.edit', ['order' => $order->id, 'return_url' => url()->full()]) }}" 
-                                               class="btn btn-sm btn-outline-primary">
+                                               class="btn btn-sm btn-outline-primary rounded-pill">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>
@@ -376,72 +454,99 @@
             </div>
 
             @if($orders->hasPages())
-                <div class="pagination-container">
-                    <nav role="navigation" aria-label="Pagination Navigation">
-                        <ul class="pagination">
-                            @if($orders->onFirstPage())
+            <div class="pagination-container">
+                <nav role="navigation" aria-label="Pagination Navigation">
+                    <ul class="pagination">
+                        {{-- Previous Page Link --}}
+                        @if($orders->onFirstPage())
+                            <li class="page-item disabled" aria-disabled="true">
+                                <span class="page-link prev-next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link prev-next" href="{{ $orders->previousPageUrl() }}" rel="prev">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        @endif
+
+                        {{-- First page with ellipsis logic --}}
+                        @if($orders->currentPage() > 3)
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $orders->url(1) }}">1</a>
+                            </li>
+                            @if($orders->currentPage() > 4)
                                 <li class="page-item disabled">
-                                    <span class="page-link prev-next"><i class="fas fa-chevron-right"></i></span>
-                                </li>
-                            @else
-                                <li class="page-item">
-                                    <a class="page-link prev-next" href="{{ $orders->previousPageUrl() }}" rel="prev">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
+                                    <span class="page-link ellipsis">•••</span>
                                 </li>
                             @endif
+                        @endif
 
-                            @if($orders->currentPage() > 3)
-                                <li class="page-item"><a class="page-link" href="{{ $orders->url(1) }}">1</a></li>
-                                @if($orders->currentPage() > 4)
-                                    <li class="page-item disabled"><span class="page-link ellipsis">•••</span></li>
+                        {{-- Pages around current page --}}
+                        @foreach(range(1, $orders->lastPage()) as $i)
+                            @if($i >= $orders->currentPage() - 2 && $i <= $orders->currentPage() + 2)
+                                @if($i == $orders->currentPage())
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link active-page">{{ $i }}</span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $orders->url($i) }}">{{ $i }}</a>
+                                    </li>
                                 @endif
                             @endif
+                        @endforeach
 
-                            @foreach(range(1, $orders->lastPage()) as $i)
-                                @if($i >= $orders->currentPage() - 2 && $i <= $orders->currentPage() + 2)
-                                    @if($i == $orders->currentPage())
-                                        <li class="page-item active">
-                                            <span class="page-link active-page">{{ $i }}</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $orders->url($i) }}">{{ $i }}</a>
-                                        </li>
-                                    @endif
-                                @endif
-                            @endforeach
-
-                            @if($orders->currentPage() < $orders->lastPage() - 2)
-                                @if($orders->currentPage() < $orders->lastPage() - 3)
-                                    <li class="page-item disabled"><span class="page-link ellipsis">•••</span></li>
-                                @endif
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ $orders->url($orders->lastPage()) }}">{{ $orders->lastPage() }}</a>
-                                </li>
-                            @endif
-
-                            @if($orders->hasMorePages())
-                                <li class="page-item">
-                                    <a class="page-link prev-next" href="{{ $orders->nextPageUrl() }}" rel="next">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            @else
+                        {{-- Last page with ellipsis logic --}}
+                        @if($orders->currentPage() < $orders->lastPage() - 2)
+                            @if($orders->currentPage() < $orders->lastPage() - 3)
                                 <li class="page-item disabled">
-                                    <span class="page-link prev-next"><i class="fas fa-chevron-left"></i></span>
+                                    <span class="page-link ellipsis">•••</span>
                                 </li>
                             @endif
-                        </ul>
-                    </nav>
-                </div>
-            @endif
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $orders->url($orders->lastPage()) }}">
+                                    {{ $orders->lastPage() }}
+                                </a>
+                            </li>
+                        @endif
+
+                        {{-- Next Page Link --}}
+                        @if($orders->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link prev-next" href="{{ $orders->nextPageUrl() }}" rel="next">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        @else
+                            <li class="page-item disabled" aria-disabled="true">
+                                <span class="page-link prev-next">
+                                    <i class="fas fa-chevron-left"></i>
+                                </span>
+                            </li>
+                        @endif
+                    </ul>
+                </nav>
+            </div>
+        @endif
         @endif
     </div>
 @endsection
 
 @push('styles')
     <style>
+        :root {
+            --primary-light: #eef2ff;
+            --accent-color: #4f46e5;
+            --pagination-radius: 14px;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+        }
+
         .icon-circle {
             width: 60px;
             height: 60px;
@@ -456,24 +561,16 @@
             background-color: var(--primary-light) !important;
         }
 
-        .form-control,
-        .btn {
+        /* حقل البحث */
+        .search-input {
             border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
         }
 
-        .table thead th {
-            background-color: #f8f9fa;
-            color: #495057;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border-bottom: 2px solid var(--primary-light);
-            padding: 1rem 0.75rem;
-        }
-
-        .table td {
-            padding: 0.75rem;
-            color: #2c3e50;
-            vertical-align: middle;
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15);
         }
 
         kbd {
@@ -484,24 +581,46 @@
             font-size: 0.85em;
         }
 
-        .toast-container {
-            z-index: 9999;
+        /* جداول */
+        .table thead th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding: 1rem 0.5rem;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: 0.75rem 0.5rem;
+            color: #2c3e50;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f0f4ff;
         }
 
         tr.row-attached {
             background-color: #f0fff4 !important;
             transition: background-color 0.5s ease;
         }
-        
+
+        .attach-order-btn {
+            transition: all 0.2s ease;
+        }
+
+        .attach-order-btn:active {
+            transform: scale(0.95);
+        }
+
         .attach-order-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
-        :root {
-            --pagination-radius: 14px;
-        }
-        
+
         .pagination-container {
             display: flex;
             justify-content: center;
@@ -520,10 +639,12 @@
             justify-content: center;
         }
 
+        /* Page Items */
         .page-item {
             margin: 0;
         }
 
+        /* Page Links - Base Style */
         .page-link {
             display: flex;
             align-items: center;
@@ -531,23 +652,36 @@
             min-width: 42px;
             height: 42px;
             padding: 0 0.9rem;
-            background: white;
-            color: #4a5568;
+            background: transparent;
+            color: var(--heading-color);
             text-decoration: none;
             border-radius: var(--pagination-radius);
             font-weight: 600;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
-            border: 2px solid #e2e8f0;
+            transition: var(--pagination-transition);
+            border: 2px solid transparent;
             cursor: pointer;
         }
 
-        .page-link:hover {
+        /* Unselected Pages */
+        .page-link:not(.active-page):not(.prev-next):not(.ellipsis) {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Hover State for Unselected Pages */
+        .page-link:not(.active-page):not(.prev-next):not(.ellipsis):hover {
+            background: var(--accent-color);
+            color: #4a5568;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(99, 102, 241, 0.25);
         }
 
-        .page-item.active .page-link {
+        /* Active Page - Selected State */
+        .page-item.active .page-link,
+        .page-link.active-page {
             background: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
@@ -556,6 +690,20 @@
             font-weight: 700;
         }
 
+        /* Previous/Next Buttons */
+        .page-link.prev-next {
+            background: white;
+            border: 2px solid #e2e8f0;
+            min-width: 42px;
+            padding: 0;
+            border-radius: var(--pagination-radius);
+        }
+
+        .page-link.prev-next:hover:not(.disabled .page-link) {
+            transform: translateY(-2px);
+        }
+
+        /* Disabled State */
         .page-item.disabled .page-link {
             background: #f7fafc;
             color: #a0aec0;
@@ -567,6 +715,7 @@
             pointer-events: none;
         }
 
+        /* Ellipsis Style */
         .page-link.ellipsis {
             background: transparent;
             border: none;
@@ -578,82 +727,136 @@
             cursor: default;
             pointer-events: none;
         }
+
+        .page-link.ellipsis:hover {
+            background: transparent;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .pagination {
+                gap: 0.35rem;
+            }
+
+            .page-link {
+                min-width: 38px;
+                height: 38px;
+                padding: 0 0.7rem;
+                font-size: 0.9rem;
+                border-radius: 12px;
+            }
+
+            .page-link.prev-next {
+                min-width: 38px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pagination {
+                gap: 0.25rem;
+            }
+
+            .page-link {
+                min-width: 36px;
+                height: 36px;
+                padding: 0 0.5rem;
+                font-size: 0.85rem;
+                border-radius: 10px;
+            }
+        }
+
+        /* Focus State for Accessibility */
+        .page-link:focus-visible {
+            outline: none;
+            box-shadow: var(--pagination-glow);
+            border-color: var(--accent-color);
+        }
+
+        /* Selected page animation */
+        .page-item.active .page-link {
+            animation: pop 0.2s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1) translateY(-2px);
+            }
+        }
     </style>
 @endpush
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Toast notification helper
+            const searchInput = document.getElementById('searchInput');
+
+            // ضمان معالجة backspace بشكل صحيح في الحقل العربي
+            if (searchInput) {
+                // لا حاجة لكتابة كود إضافي فالحقل dir="rtl" يحل المشكلة
+                searchInput.focus();
+            }
+
+            // Toast helper
             function showToast(message, type = 'success') {
                 const toast = document.getElementById('toastNotification');
                 const toastMessage = document.getElementById('toastMessage');
-                
-                // Remove existing classes
+
                 toast.classList.remove('bg-success', 'bg-danger', 'bg-warning');
-                
-                // Add appropriate class
-                if (type === 'success') {
-                    toast.classList.add('bg-success');
-                } else if (type === 'error') {
-                    toast.classList.add('bg-danger');
-                } else if (type === 'warning') {
-                    toast.classList.add('bg-warning');
-                }
-                
+                if (type === 'success') toast.classList.add('bg-success');
+                else if (type === 'error') toast.classList.add('bg-danger');
+                else if (type === 'warning') toast.classList.add('bg-warning');
+
                 toastMessage.textContent = message;
-                
-                const bsToast = new bootstrap.Toast(toast, {
-                    delay: 3000,
-                    autohide: true
-                });
+                const bsToast = new bootstrap.Toast(toast, { delay: 3000, autohide: true });
                 bsToast.show();
             }
 
-            // Reset the page like check_orders
+            // إعادة ضبط الصفحة لاستقبال بحث جديد
             function resetPage() {
-                const searchInput = document.getElementById('searchInput');
                 if (searchInput) {
                     searchInput.value = '';
                     searchInput.focus();
                 }
-                
-                // Hide single order card
-                const singleOrderCard = document.getElementById('singleOrderCard');
-                if (singleOrderCard) {
-                    singleOrderCard.classList.add('d-none');
-                }
-                
-                // Hide table and results bar
-                const tableCard = document.querySelector('#ordersTable')?.closest('.card.border-0.shadow-sm');
+
+                // إخفاء البطاقة المفردة
+                const singleCard = document.getElementById('singleOrderCard');
+                if (singleCard) singleCard.classList.add('d-none');
+
+                // إخفاء الجدول وشريط النتائج
+                const tableCard = document.querySelector('#ordersTable')?.closest('.card');
                 const resultsBar = document.querySelector('.card.border-0.shadow-sm.mb-3');
-                
                 if (tableCard) tableCard.classList.add('d-none');
                 if (resultsBar) resultsBar.classList.add('d-none');
-                
-                // Hide pagination
-                const paginationContainer = document.querySelector('.pagination-container');
-                if (paginationContainer) paginationContainer.classList.add('d-none');
-                
-                // Show initial search prompt
-                let initialCard = document.getElementById('initialSearchCard');
-                if (initialCard) {
-                    initialCard.classList.remove('d-none');
-                }
-                
-                // Clear URL parameters without reload
+
+                // إخفاء الترقيم
+                document.querySelectorAll('.pagination-container').forEach(el => el.classList.add('d-none'));
+
+                // عرض بطاقة البحث الفارغة إن وجدت
+                const initialCard = document.getElementById('initialSearchCard');
+                if (initialCard) initialCard.classList.remove('d-none');
+
+                // تنظيف الـ URL
                 if (window.history && window.history.pushState) {
-                    const newUrl = '{{ route("drivers.attach-orders", $driver) }}';
-                    window.history.pushState({}, '', newUrl);
+                    window.history.pushState({}, '', '{{ route("drivers.attach-orders", $driver) }}');
                 }
             }
 
-            // Attach order via AJAX
+            // إسناد الطلب عبر AJAX
             function attachOrder(orderId, orderNumber, buttonElement) {
-                // Disable button and show loading
                 const originalHtml = buttonElement.innerHTML;
                 buttonElement.disabled = true;
-                buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-                
+                buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
                 fetch('{{ route("drivers.attach-orders.store", $driver) }}', {
                     method: 'POST',
                     headers: {
@@ -662,19 +865,13 @@
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({ 
-                        order_id: orderId 
-                    })
+                    body: JSON.stringify({ order_id: orderId })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success toast
                         showToast(data.message, 'success');
-                        
-                        // Update the UI
                         updateOrderRowAfterAttach(orderId, buttonElement);
-                        
                     } else {
                         showToast(data.message || 'حدث خطأ أثناء الإسناد', 'error');
                         buttonElement.disabled = false;
@@ -682,97 +879,75 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     showToast('حدث خطأ في الاتصال', 'error');
                     buttonElement.disabled = false;
                     buttonElement.innerHTML = originalHtml;
                 });
             }
-            
+
             function updateOrderRowAfterAttach(orderId, buttonElement) {
-                // Update the row to show attached status
                 const row = document.getElementById(`order-row-${orderId}`);
                 if (row) {
-                    // Add a highlight class
-                    row.classList.add('row-attached');
-                    row.classList.add('table-success');
-                    
-                    // Change button to show attached state
+                    row.classList.add('row-attached', 'table-success');
                     buttonElement.classList.remove('btn-success');
                     buttonElement.classList.add('btn-outline-success');
                     buttonElement.innerHTML = '<i class="fas fa-check"></i> تم';
                     buttonElement.disabled = true;
                     buttonElement.title = 'تم الإسناد';
-                    
-                    // Update driver cell
+
                     const driverCell = document.getElementById(`driver-cell-${orderId}`);
                     if (driverCell) {
-                        driverCell.innerHTML = '<span class="badge bg-warning text-dark">{{ $driver->name }}</span><small class="text-warning d-block">هذا السائق</small>';
+                        driverCell.innerHTML = '<strong class="text-warning">{{ $driver->name }}</strong><small class="text-muted d-block">هذا السائق</small>';
                     }
-                    
-                    // Fade out after 1 second
+
                     setTimeout(() => {
                         row.style.transition = 'all 0.5s ease';
                         row.style.opacity = '0';
                         row.style.transform = 'scale(0.95)';
-                        
                         setTimeout(() => {
                             row.remove();
-                            
-                            // Check if this was the last row in the table
-                            const tbody = document.querySelector('#ordersTable tbody');
-                            if (tbody && tbody.children.length === 0) {
-                                // All orders have been attached, reset the page
-                                setTimeout(() => {
-                                    resetPage();
-                                }, 300);
+                            if (document.querySelectorAll('#ordersTable tbody tr').length === 0) {
+                                setTimeout(resetPage, 300);
                             }
                         }, 500);
                     }, 1000);
                 }
-                
-                // If single order view, update the button then reset
+
+                // التعامل مع زر البطاقة المفردة
                 if (buttonElement.id === 'attachSingleBtn') {
                     buttonElement.classList.remove('btn-success');
                     buttonElement.classList.add('btn-outline-success');
                     buttonElement.innerHTML = '<i class="fas fa-check me-2"></i>تم الإسناد بنجاح';
                     buttonElement.disabled = true;
-                    
-                    // Update driver name
-                    const currentDriverName = document.getElementById('currentDriverName');
-                    if (currentDriverName) {
-                        currentDriverName.textContent = '{{ $driver->name }}';
-                        currentDriverName.className = 'text-warning fw-bold';
+
+                    const currentDriver = document.getElementById('currentDriverName');
+                    if (currentDriver) {
+                        currentDriver.textContent = '{{ $driver->name }}';
+                        currentDriver.className = 'text-warning fw-bold';
                     }
-                    
-                    // Reset the page after 1.5 seconds - just like check_orders
-                    setTimeout(() => {
-                        resetPage();
-                    }, 1500);
+
+                    setTimeout(resetPage, 1500);
                 }
             }
 
-            // Attach event listeners to all attach buttons
+            // ربط أحداث النقر على أزرار الإسناد
             document.querySelectorAll('.attach-order-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const orderId = this.dataset.orderId;
                     const orderNumber = this.dataset.orderNumber;
-                    
-                    // Show confirmation for single view
                     if (this.id === 'attachSingleBtn') {
                         if (confirm(`هل أنت متأكد من إسناد الطلب #${orderNumber} للسائق {{ $driver->name }}؟`)) {
                             attachOrder(orderId, orderNumber, this);
                         }
                     } else {
-                        // For table buttons, attach directly
                         attachOrder(orderId, orderNumber, this);
                     }
                 });
             });
 
-            // ─── Keyboard Shortcuts ───
+            // اختصارات لوحة المفاتيح
             document.addEventListener('keydown', function(e) {
-                // Ctrl+Enter to attach single order (only if attachable)
+                // Ctrl+Enter للإسناد السريع في البطاقة المفردة
                 if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                     const singleBtn = document.getElementById('attachSingleBtn');
                     if (singleBtn && !singleBtn.disabled) {
@@ -785,18 +960,29 @@
                     }
                 }
 
-                // Escape key - clear search and focus on search input for new search
+                // Escape لمسح الحقل والبدء من جديد
                 if (e.key === 'Escape') {
-                    const searchInput = document.getElementById('searchInput');
+                    // لا نمنع السلوك الافتراضي إذا كان المستخدم في حقل إدخال آخر
+                    if (document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement !== searchInput) {
+                        return; // اترك السلوك الافتراضي لحقول أخرى
+                    }
+                    e.preventDefault();
                     if (searchInput) {
-                        e.preventDefault();
-                        // Clear the search input
                         searchInput.value = '';
-                        // Focus on it
                         searchInput.focus();
                     }
+                    // إخفاء النتائج إذا كانت موجودة (اختياري)
+                    const singleCard = document.getElementById('singleOrderCard');
+                    if (singleCard) singleCard.classList.add('d-none');
+                    const tableCard = document.querySelector('#ordersTable')?.closest('.card');
+                    if (tableCard) tableCard.classList.add('d-none');
+                    // إظهار بطاقة البحث الأولية إن وجدت
+                    const initialCard = document.getElementById('initialSearchCard');
+                    if (initialCard) initialCard.classList.remove('d-none');
                 }
             });
+
+            // التأكد من إمكانية استخدام Backspace بشكل طبيعي - لا حاجة لأي كود إضافي
         });
     </script>
 @endpush
